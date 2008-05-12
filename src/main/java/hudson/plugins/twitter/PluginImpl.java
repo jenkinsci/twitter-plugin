@@ -1,0 +1,13 @@
+package hudson.plugins.twitter;
+
+import hudson.Plugin;
+import hudson.tasks.BuildStep;
+
+/**
+ * @author cactusman
+ */
+public class PluginImpl extends Plugin {
+    public void start() throws Exception {
+        BuildStep.PUBLISHERS.addNotifier(TwitterPublisher.DESCRIPTOR);
+    }
+}
