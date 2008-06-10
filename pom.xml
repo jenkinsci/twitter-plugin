@@ -23,7 +23,7 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>yusuke.homeip.net</groupId>
+			<groupId>net.homeip.yusuke</groupId>
 			<artifactId>twitter4j</artifactId>
 			<version>1.0.3</version>
 		</dependency>
