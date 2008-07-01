@@ -11,6 +11,7 @@
 	<packaging>hpi</packaging>
 	<version>0.2-SNAPSHOT</version>
 	<name>Twitter plugin</name>
+    <description>Plugin for Hudson that adds tweets to Twitter (http://www.twitter.com/) for build events.</description>
 	<url>http://hudson.gotdns.com/wiki/display/HUDSON/Twitter+Plugin</url>
 
     <dependencies>
