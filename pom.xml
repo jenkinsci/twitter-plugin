@@ -1,18 +1,22 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.jvnet.hudson.plugins</groupId>
-		<artifactId>plugin</artifactId>
-		<version>1.230</version>
-		<relativePath>../pom.xml</relativePath>
-	</parent>
-	
-	<artifactId>twitter</artifactId>
-	<packaging>hpi</packaging>
-	<version>0.2-SNAPSHOT</version>
-	<name>Twitter plugin</name>
-    <description>Plugin for Hudson that adds tweets to Twitter (http://www.twitter.com/) for build events.</description>
-	<url>http://hudson.gotdns.com/wiki/display/HUDSON/Twitter+Plugin</url>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.jvnet.hudson.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>1.230</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>twitter</artifactId>
+    <packaging>hpi</packaging>
+    <version>0.2-SNAPSHOT</version>
+    <name>Twitter plugin</name>
+    <description>
+        Plugin for Hudson that adds tweets to Twitter (http://www.twitter.com/) for build events.
+    </description>
+    <url>http://hudson.gotdns.com/wiki/display/HUDSON/Twitter+Plugin</url>
 
     <dependencies>
         <dependency>
@@ -33,4 +37,20 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <formats>
+                        <format>xml</format>
+                        <format>html</format>
+                    </formats>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
