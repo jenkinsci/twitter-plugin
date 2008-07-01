@@ -12,4 +12,9 @@ public class PluginImpl extends Plugin {
     public void start() throws Exception {
         BuildStep.PUBLISHERS.addNotifier(TwitterPublisher.DESCRIPTOR);
     }
+
+    @Override
+    public void stop() throws Exception {
+        BuildStep.PUBLISHERS.remove(TwitterPublisher.DESCRIPTOR);
+    }
 }
