@@ -1,7 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
 	xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
 	xmlns:f="/lib/form">
-	<f:section title="Twitter">
+	<f:section title="Global Twitter Settings">
 		<f:entry title="ID">
 			<input class="setting-input" name="twitter-id" type="text"
 				value="${descriptor.id}" />
@@ -10,5 +10,14 @@
 			<input class="setting-input" name="twitter-password"
 				type="password" value="${descriptor.password}" />
 		</f:entry>
+		
+		<f:entry title="Only Tweet on Failure and Recovery?">
+		    <f:checkbox name="twitter-onlyOnFailureAndRecovery" checked="${descriptor.onlyOnFailureAndRecovery}" />
+		</f:entry>
+		
+		<f:entry title="Include the Build URL in the Tweet?">
+		    <f:checkbox name="twitter-includeURL" checked="${descriptor.includeURL}" />
+		</f:entry>
+		
 	</f:section>
 </j:jelly>
