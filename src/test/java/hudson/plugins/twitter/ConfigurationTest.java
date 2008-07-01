@@ -1,5 +1,6 @@
 package hudson.plugins.twitter;
 
+import hudson.tasks.BuildStep;
 import net.sf.json.JSONObject;
 
 import org.apache.commons.io.FileUtils;
@@ -10,6 +11,17 @@ import org.junit.Test;
 import org.kohsuke.stapler.StaplerRequest;
 
 public class ConfigurationTest {
+
+    @Test
+    public void testPlugin() throws Exception {
+        Assert.assertFalse(BuildStep.PUBLISHERS.contains(TwitterPublisher.DESCRIPTOR));
+        PluginImpl impl = new PluginImpl();
+        impl.start();
+        Assert.assertTrue(BuildStep.PUBLISHERS.contains(TwitterPublisher.DESCRIPTOR));
+        impl.stop();
+        Assert.assertFalse(BuildStep.PUBLISHERS.contains(TwitterPublisher.DESCRIPTOR));
+
+    }
 
     @Test
     public void testDescriptorConfiguration() throws Exception {
@@ -82,6 +94,7 @@ public class ConfigurationTest {
 
     @After
     public void tearDown() throws Exception {
+        BuildStep.PUBLISHERS.clear();
         HudsonUtil.hudson.cleanUp();
         FileUtils.deleteDirectory(HudsonUtil.root);
     }
