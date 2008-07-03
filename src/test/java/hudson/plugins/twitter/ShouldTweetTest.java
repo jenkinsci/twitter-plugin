@@ -14,7 +14,7 @@ public class ShouldTweetTest {
 
     @Test
     public void testWhenDescriptorTrueAndInstanceNull() throws Exception {
-        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "onlyOnFailureAndRecovery", true);
+        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "onlyOnFailureOrRecovery", true);
 
         TwitterPublisher pub = new TwitterPublisher(null, null, null, null);
 
@@ -23,7 +23,7 @@ public class ShouldTweetTest {
 
     @Test
     public void testWhenDescriptorTrueAndInstanceFalse() throws Exception {
-        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "onlyOnFailureAndRecovery", true);
+        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "onlyOnFailureOrRecovery", true);
 
         TwitterPublisher pub = new TwitterPublisher(null, null, Boolean.FALSE, null);
 
@@ -32,7 +32,7 @@ public class ShouldTweetTest {
 
     @Test
     public void testWhenDescriptorTrueAndInstanceTrue() throws Exception {
-        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "onlyOnFailureAndRecovery", true);
+        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "onlyOnFailureOrRecovery", true);
 
         TwitterPublisher pub = new TwitterPublisher(null, null, Boolean.TRUE, null);
 
@@ -41,7 +41,7 @@ public class ShouldTweetTest {
 
     @Test
     public void testWhenDescriptorFalseAndInstanceNull() throws Exception {
-        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "onlyOnFailureAndRecovery", false);
+        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "onlyOnFailureOrRecovery", false);
 
         TwitterPublisher pub = new TwitterPublisher(null, null, null, null);
 
@@ -50,7 +50,7 @@ public class ShouldTweetTest {
 
     @Test
     public void testWhenDescriptorFalseAndInstanceFalse() throws Exception {
-        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "onlyOnFailureAndRecovery", false);
+        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "onlyOnFailureOrRecovery", false);
 
         TwitterPublisher pub = new TwitterPublisher(null, null, Boolean.FALSE, null);
 
@@ -59,7 +59,7 @@ public class ShouldTweetTest {
 
     @Test
     public void testWhenDescriptorFalseAndInstanceTrue() throws Exception {
-        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "onlyOnFailureAndRecovery", false);
+        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "onlyOnFailureOrRecovery", false);
 
         TwitterPublisher pub = new TwitterPublisher(null, null, Boolean.TRUE, null);
 

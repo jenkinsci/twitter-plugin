@@ -12,6 +12,8 @@ import hudson.tasks.Publisher;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,18 +44,18 @@ public class TwitterPublisher extends Publisher {
 
     private String password;
 
-    private Boolean onlyOnFailureAndRecovery;
+    private Boolean onlyOnFailureOrRecovery;
 
-    private Boolean includeURL;
+    private Boolean includeUrl;
 
     /**
      * {@stapler-constructor}
      */
     @DataBoundConstructor
-    public TwitterPublisher(String id, String password, Boolean onlyOnFailureAndRecovery,
-            Boolean includeURL) {
-        this.onlyOnFailureAndRecovery = onlyOnFailureAndRecovery;
-        this.includeURL = includeURL;
+    public TwitterPublisher(String id, String password, Boolean onlyOnFailureOrRecovery,
+            Boolean includeUrl) {
+        this.onlyOnFailureOrRecovery = onlyOnFailureOrRecovery;
+        this.includeUrl = includeUrl;
         this.id = id;
         this.password = password;
     }
@@ -80,12 +82,12 @@ public class TwitterPublisher extends Publisher {
         return id;
     }
 
-    public Boolean getIncludeURL() {
-        return includeURL;
+    public Boolean getIncludeUrl() {
+        return includeUrl;
     }
 
-    public Boolean getOnlyOnFailureAndRecovery() {
-        return onlyOnFailureAndRecovery;
+    public Boolean getOnlyOnFailureOrRecovery() {
+        return onlyOnFailureOrRecovery;
     }
 
     public String getPassword() {
@@ -108,7 +110,7 @@ public class TwitterPublisher extends Publisher {
         if (shouldTweet(build)) {
 
             String newStatus = null;
-            if (shouldIncludeURL()) {
+            if (shouldIncludeUrl()) {
                 try {
                     newStatus = createStatusWithURL(build);
                 } catch (IOException e) {
@@ -169,11 +171,11 @@ public class TwitterPublisher extends Publisher {
         }
     }
 
-    protected boolean shouldIncludeURL() {
-        if (includeURL != null) {
-            return includeURL.booleanValue();
+    protected boolean shouldIncludeUrl() {
+        if (includeUrl != null) {
+            return includeUrl.booleanValue();
         } else {
-            return DESCRIPTOR.includeURL;
+            return DESCRIPTOR.includeUrl;
         }
     }
 
@@ -186,13 +188,13 @@ public class TwitterPublisher extends Publisher {
      * @return true if we should tweet this build result
      */
     protected <P extends Project<P, B>, B extends Build<P, B>> boolean shouldTweet(B build) {
-        if (onlyOnFailureAndRecovery == null) {
-            if (DESCRIPTOR.onlyOnFailureAndRecovery) {
+        if (onlyOnFailureOrRecovery == null) {
+            if (DESCRIPTOR.onlyOnFailureOrRecovery) {
                 return isFailureOrRecovery(build);
             } else {
                 return true;
             }
-        } else if (onlyOnFailureAndRecovery.booleanValue()) {
+        } else if (onlyOnFailureOrRecovery.booleanValue()) {
             return isFailureOrRecovery(build);
         } else {
             return true;
@@ -202,21 +204,12 @@ public class TwitterPublisher extends Publisher {
     public static final class DescriptorImpl extends Descriptor<Publisher> {
         private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class.getName());
 
-        private static final String ID_FIELD = "twitter-id";
-
-        private static final String PASSWORD_FIELD = "twitter-password";
-
-        private static final String ONLY_ON_FAILURE = "twitter-only-on-failure";
-
-        private static final String INCLUDE_URL_FIELD = "twitter-include-url";
-
         private Class<? extends AsyncTwitter> asyncTwitterClass = AsyncTwitter.class;
-        private String id;
-        private String password;
-        private String hudsonUrl;
-
-        private boolean onlyOnFailureAndRecovery;
-        private boolean includeURL;
+        public String id;
+        public String password;
+        public String hudsonUrl;
+        public boolean onlyOnFailureOrRecovery;
+        public boolean includeUrl;
 
         protected DescriptorImpl() {
             super(TwitterPublisher.class);
@@ -225,10 +218,11 @@ public class TwitterPublisher extends Publisher {
 
         @Override
         public boolean configure(StaplerRequest req) throws FormException {
-            id = req.getParameter(ID_FIELD);
-            password = req.getParameter(PASSWORD_FIELD);
-            onlyOnFailureAndRecovery = Boolean.parseBoolean(req.getParameter(ONLY_ON_FAILURE));
-            includeURL = Boolean.parseBoolean(req.getParameter(INCLUDE_URL_FIELD));
+            // set the booleans to false as defaults
+            includeUrl = false;
+            onlyOnFailureOrRecovery = false;
+
+            req.bindParameters(this, "twitter.");
             hudsonUrl = Mailer.DESCRIPTOR.getUrl();
             save();
             return super.configure(req);
@@ -251,23 +245,50 @@ public class TwitterPublisher extends Publisher {
             return hudsonUrl;
         }
 
-        public boolean isIncludeURL() {
-            return includeURL;
+        public boolean isIncludeUrl() {
+            return includeUrl;
         }
 
-        public boolean isOnlyOnFailureAndRecovery() {
-            return onlyOnFailureAndRecovery;
+        public boolean isOnlyOnFailureOrRecovery() {
+            return onlyOnFailureOrRecovery;
         }
 
         @Override
         public Publisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+            JSONObject cleanedFormData = cleanJSON(formData);
             if (hudsonUrl == null) {
                 // if Hudson URL is not configured yet, infer some default
                 hudsonUrl = Functions.inferHudsonURL(req);
                 save();
             }
-            return req.bindJSON(clazz, formData);
+            Publisher publisher = req.bindJSON(clazz, cleanedFormData);
+            return publisher;
         }
+
+        /**
+         * Clean up the formData object by removing blanks and (Default) values.
+         * 
+         * @param formData
+         *            the incoming form data
+         * @return a new cleaned JSONObject object
+         */
+        protected static JSONObject cleanJSON(JSONObject formData) {
+            JSONObject cleaned = new JSONObject();
+            for (Object key : formData.keySet()) {
+                Object o = formData.get(key);
+                if (o instanceof String) {
+                    if (!VALUES_REPLACED_WITH_NULL.contains(o)) {
+                        cleaned.put(key, o);
+                    }
+                } else {
+                    cleaned.put(key, o);
+                }
+            }
+            return cleaned;
+        }
+
+        private static final List<String> VALUES_REPLACED_WITH_NULL = Arrays
+                .asList("", "(Default)");
 
         public void updateTwit(String id, String password, String message) throws Exception {
             if (id == null || password == null) {

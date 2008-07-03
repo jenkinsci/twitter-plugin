@@ -12,28 +12,28 @@ public class ShouldIncludeURLTest {
     public void testTrueInDescriptor() throws Exception {
         TwitterPublisher pub = new TwitterPublisher(null, null, null, null);
 
-        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "includeURL", true);
-        Assert.assertTrue(pub.shouldIncludeURL());
+        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "includeUrl", true);
+        Assert.assertTrue(pub.shouldIncludeUrl());
 
-        ReflectionHelper.setField(pub, "includeURL", Boolean.FALSE);
-        Assert.assertFalse(pub.shouldIncludeURL());
+        ReflectionHelper.setField(pub, "includeUrl", Boolean.FALSE);
+        Assert.assertFalse(pub.shouldIncludeUrl());
 
-        ReflectionHelper.setField(pub, "includeURL", Boolean.TRUE);
-        Assert.assertTrue(pub.shouldIncludeURL());
+        ReflectionHelper.setField(pub, "includeUrl", Boolean.TRUE);
+        Assert.assertTrue(pub.shouldIncludeUrl());
     }
 
     @Test
     public void testFalseInDescriptor() throws Exception {
         TwitterPublisher pub = new TwitterPublisher(null, null, null, null);
 
-        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "includeURL", false);
-        Assert.assertFalse(pub.shouldIncludeURL());
+        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "includeUrl", false);
+        Assert.assertFalse(pub.shouldIncludeUrl());
 
-        ReflectionHelper.setField(pub, "includeURL", Boolean.FALSE);
-        Assert.assertFalse(pub.shouldIncludeURL());
+        ReflectionHelper.setField(pub, "includeUrl", Boolean.FALSE);
+        Assert.assertFalse(pub.shouldIncludeUrl());
 
-        ReflectionHelper.setField(pub, "includeURL", Boolean.TRUE);
-        Assert.assertTrue(pub.shouldIncludeURL());
+        ReflectionHelper.setField(pub, "includeUrl", Boolean.TRUE);
+        Assert.assertTrue(pub.shouldIncludeUrl());
     }
 
     @Before

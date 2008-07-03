@@ -1,17 +1,26 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <f:entry title="Only Tweet on Failure and Recovery?">
-    <select class="setting-input validated" name="twitter.onlyOnFailureAndRecovery">
+  <f:entry title="Only Tweet on Failure or Recovery?">
+    <select class="setting-input validated" name="twitter.onlyOnFailureOrRecovery">
         <option>(Default)</option>
-        <f:option selected="${instance.onlyOnFailureAndRecovery==true}">Yes</f:option>
-        <f:option selected="${instance.onlyOnFailureAndRecovery==false}">No</f:option>
+        <f:option selected="${instance.onlyOnFailureOrRecovery==true}">Yes</f:option>
+        <f:option selected="${instance.onlyOnFailureOrRecovery==false}">No</f:option>
       </select>
   </f:entry>
   
-  <f:entry title="Include Build URL?">
-    <select class="setting-input validated" name="twitter.includeURL">
+  <f:entry title="Include Build Url?">
+    <select class="setting-input validated" name="twitter.includeUrl">
         <option>(Default)</option>
-        <f:option selected="${instance.includeURL==true}">Yes</f:option>
-        <f:option selected="${instance.includeURL==false}">No</f:option>
+        <f:option selected="${instance.includeUrl==true}">Yes</f:option>
+        <f:option selected="${instance.includeUrl==false}">No</f:option>
       </select>
   </f:entry>
+  
+  <f:advanced>
+  	<f:entry title="ID">
+	    <input class="setting-input" name="twitter.id" type="text" value="${instance.id}" />
+    </f:entry>
+	<f:entry title="Password">
+		<input class="setting-input" name="twitter.password" type="password" value="${instance.password}" />
+	</f:entry>
+  </f:advanced>
 </j:jelly>

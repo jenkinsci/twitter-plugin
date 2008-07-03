@@ -3,6 +3,7 @@ package hudson.plugins.twitter;
 import hudson.tasks.BuildStep;
 import net.sf.json.JSONObject;
 
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
@@ -24,19 +25,38 @@ public class ConfigurationTest {
     }
 
     @Test
-    public void testDescriptorConfiguration() throws Exception {
+    public void testDescriptorConfigurationBooleansTrue() throws Exception {
         MockHttpServletRequest req = new MockHttpServletRequest();
-        req.setupAddParameter("twitter-id", "test-user");
-        req.setupAddParameter("twitter-password", "test-password");
-        req.setupAddParameter("twitter-only-on-failure", "true");
-        req.setupAddParameter("twitter-include-url", "true");
+        req.setupAddParameter("twitter.id", "test-user");
+        req.setupAddParameter("twitter.password", "test-password");
+        req.setupAddParameter("twitter.onlyOnFailureOrRecovery", "on");
+        req.setupAddParameter("twitter.includeUrl", "on");
+        req.setupGetParameterNames(IteratorUtils.asEnumeration(IteratorUtils
+                .arrayIterator(new String[] { "twitter.id", "twitter.password",
+                        "twitter.includeUrl", "twitter.onlyOnFailureOrRecovery" })));
         req.setupGetRequestURI("/configure");
         StaplerRequest sreq = HudsonUtil.createStaplerRequest(req);
         TwitterPublisher.DESCRIPTOR.configure(sreq);
-        Assert.assertTrue(TwitterPublisher.DESCRIPTOR.isIncludeURL());
-        Assert.assertTrue(TwitterPublisher.DESCRIPTOR.isOnlyOnFailureAndRecovery());
         Assert.assertEquals("test-user", TwitterPublisher.DESCRIPTOR.getId());
         Assert.assertEquals("test-password", TwitterPublisher.DESCRIPTOR.getPassword());
+        Assert.assertTrue(TwitterPublisher.DESCRIPTOR.isIncludeUrl());
+        Assert.assertTrue(TwitterPublisher.DESCRIPTOR.isOnlyOnFailureOrRecovery());
+    }
+
+    @Test
+    public void testDescriptorConfigurationBooleansFalse() throws Exception {
+        MockHttpServletRequest req = new MockHttpServletRequest();
+        req.setupAddParameter("twitter.id", "test-user");
+        req.setupAddParameter("twitter.password", "test-password");
+        req.setupGetParameterNames(IteratorUtils.asEnumeration(IteratorUtils
+                .arrayIterator(new String[] { "twitter.id", "twitter.password" })));
+        req.setupGetRequestURI("/configure");
+        StaplerRequest sreq = HudsonUtil.createStaplerRequest(req);
+        TwitterPublisher.DESCRIPTOR.configure(sreq);
+        Assert.assertEquals("test-user", TwitterPublisher.DESCRIPTOR.getId());
+        Assert.assertEquals("test-password", TwitterPublisher.DESCRIPTOR.getPassword());
+        Assert.assertFalse(TwitterPublisher.DESCRIPTOR.isIncludeUrl());
+        Assert.assertFalse(TwitterPublisher.DESCRIPTOR.isOnlyOnFailureOrRecovery());
     }
 
     @Test
@@ -55,8 +75,8 @@ public class ConfigurationTest {
         TwitterPublisher pub = (TwitterPublisher) TwitterPublisher.DESCRIPTOR.newInstance(sreq,
                 formData);
 
-        Assert.assertNull(pub.getIncludeURL());
-        Assert.assertNull(pub.getOnlyOnFailureAndRecovery());
+        Assert.assertNull(pub.getIncludeUrl());
+        Assert.assertNull(pub.getOnlyOnFailureOrRecovery());
         Assert.assertNull(pub.getId());
         Assert.assertNull(pub.getPassword());
     }
@@ -75,16 +95,18 @@ public class ConfigurationTest {
         JSONObject formData = new JSONObject();
         formData.put("id", "test-id");
         formData.put("password", "test-password");
-        formData.put("onlyOnFailureAndRecovery", "false");
-        formData.put("includeURL", "true");
+        formData.put("onlyOnFailureOrRecovery", false);
+        formData.put("includeUrl", true);
 
         TwitterPublisher pub = (TwitterPublisher) TwitterPublisher.DESCRIPTOR.newInstance(sreq,
                 formData);
 
         Assert.assertEquals("test-id", pub.getId());
         Assert.assertEquals("test-password", pub.getPassword());
-        Assert.assertTrue(pub.getIncludeURL());
-        Assert.assertFalse(pub.getOnlyOnFailureAndRecovery());
+        Assert.assertNotNull(pub.getIncludeUrl());
+        Assert.assertNotNull(pub.getOnlyOnFailureOrRecovery());
+        Assert.assertTrue(pub.getIncludeUrl());
+        Assert.assertFalse(pub.getOnlyOnFailureOrRecovery());
     }
 
     @Before

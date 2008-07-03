@@ -3,20 +3,20 @@
 	xmlns:f="/lib/form">
 	<f:section title="Global Twitter Settings">
 		<f:entry title="ID">
-			<input class="setting-input" name="twitter-id" type="text"
+			<input class="setting-input" name="twitter.id" type="text"
 				value="${descriptor.id}" />
 		</f:entry>
 		<f:entry title="Password">
-			<input class="setting-input" name="twitter-password"
+			<input class="setting-input" name="twitter.password"
 				type="password" value="${descriptor.password}" />
 		</f:entry>
 		
-		<f:entry title="Only Tweet on Failure and Recovery?">
-		    <f:checkbox name="twitter-onlyOnFailureAndRecovery" checked="${descriptor.onlyOnFailureAndRecovery}" />
+		<f:entry title="Only Tweet on Failure or Recovery?">
+		    <f:checkbox name="twitter.onlyOnFailureOrRecovery" checked="${descriptor.onlyOnFailureOrRecovery}" />
 		</f:entry>
 		
 		<f:entry title="Include the Build URL in the Tweet?">
-		    <f:checkbox name="twitter-includeURL" checked="${descriptor.includeURL}" />
+		    <f:checkbox name="twitter.includeUrl" checked="${descriptor.includeUrl}" />
 		</f:entry>
 		
 	</f:section>
