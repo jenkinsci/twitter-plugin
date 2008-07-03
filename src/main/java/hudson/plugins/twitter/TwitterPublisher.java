@@ -204,16 +204,41 @@ public class TwitterPublisher extends Publisher {
     public static final class DescriptorImpl extends Descriptor<Publisher> {
         private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class.getName());
 
-        private Class<? extends AsyncTwitter> asyncTwitterClass = AsyncTwitter.class;
+        private static final List<String> VALUES_REPLACED_WITH_NULL = Arrays.asList("",
+                "(Default)", "(System Default)");
         public String id;
         public String password;
         public String hudsonUrl;
         public boolean onlyOnFailureOrRecovery;
         public boolean includeUrl;
 
+        private Class<? extends AsyncTwitter> asyncTwitterClass = AsyncTwitter.class;
+
         protected DescriptorImpl() {
             super(TwitterPublisher.class);
             load();
+        }
+
+        /**
+         * Clean up the formData object by removing blanks and (Default) values.
+         * 
+         * @param formData
+         *            the incoming form data
+         * @return a new cleaned JSONObject object
+         */
+        protected static JSONObject cleanJSON(JSONObject formData) {
+            JSONObject cleaned = new JSONObject();
+            for (Object key : formData.keySet()) {
+                Object o = formData.get(key);
+                if (o instanceof String) {
+                    if (!VALUES_REPLACED_WITH_NULL.contains(o)) {
+                        cleaned.put(key, o);
+                    }
+                } else {
+                    cleaned.put(key, o);
+                }
+            }
+            return cleaned;
         }
 
         @Override
@@ -264,31 +289,6 @@ public class TwitterPublisher extends Publisher {
             Publisher publisher = req.bindJSON(clazz, cleanedFormData);
             return publisher;
         }
-
-        /**
-         * Clean up the formData object by removing blanks and (Default) values.
-         * 
-         * @param formData
-         *            the incoming form data
-         * @return a new cleaned JSONObject object
-         */
-        protected static JSONObject cleanJSON(JSONObject formData) {
-            JSONObject cleaned = new JSONObject();
-            for (Object key : formData.keySet()) {
-                Object o = formData.get(key);
-                if (o instanceof String) {
-                    if (!VALUES_REPLACED_WITH_NULL.contains(o)) {
-                        cleaned.put(key, o);
-                    }
-                } else {
-                    cleaned.put(key, o);
-                }
-            }
-            return cleaned;
-        }
-
-        private static final List<String> VALUES_REPLACED_WITH_NULL = Arrays
-                .asList("", "(Default)");
 
         public void updateTwit(String id, String password, String message) throws Exception {
             if (id == null || password == null) {

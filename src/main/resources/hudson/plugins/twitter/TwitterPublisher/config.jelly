@@ -1,25 +1,25 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <f:entry title="Only Tweet on Failure or Recovery?">
-    <select class="setting-input validated" name="twitter.onlyOnFailureOrRecovery">
-        <option>(Default)</option>
-        <f:option selected="${instance.onlyOnFailureOrRecovery==true}">Yes</f:option>
-        <f:option selected="${instance.onlyOnFailureOrRecovery==false}">No</f:option>
-      </select>
-  </f:entry>
-  
-  <f:entry title="Include Build Url?">
-    <select class="setting-input validated" name="twitter.includeUrl">
-        <option>(Default)</option>
-        <f:option selected="${instance.includeUrl==true}">Yes</f:option>
-        <f:option selected="${instance.includeUrl==false}">No</f:option>
-      </select>
-  </f:entry>
-  
   <f:advanced>
-  	<f:entry title="ID">
+    <f:entry title="Only Tweet on Failure or Recovery?" help="/plugin/twitter/help-project-failure.html">
+      <select class="setting-input validated" name="twitter.onlyOnFailureOrRecovery">
+          <option>(System Default)</option>
+          <f:option selected="${instance.onlyOnFailureOrRecovery==true}">Yes</f:option>
+          <f:option selected="${instance.onlyOnFailureOrRecovery==false}">No</f:option>
+        </select>
+    </f:entry>
+  
+    <f:entry title="Include Build Url?" help="/plugin/twitter/help-project-url.html">
+      <select class="setting-input validated" name="twitter.includeUrl">
+          <option>(System Default)</option>
+          <f:option selected="${instance.includeUrl==true}">Yes</f:option>
+          <f:option selected="${instance.includeUrl==false}">No</f:option>
+        </select>
+    </f:entry>
+    
+  	<f:entry title="ID" help="/plugin/twitter/help-project-id.html">
 	    <input class="setting-input" name="twitter.id" type="text" value="${instance.id}" />
     </f:entry>
-	<f:entry title="Password">
+	<f:entry title="Password" help="/plugin/twitter/help-project-password.html">
 		<input class="setting-input" name="twitter.password" type="password" value="${instance.password}" />
 	</f:entry>
   </f:advanced>

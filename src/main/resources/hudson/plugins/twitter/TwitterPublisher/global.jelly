@@ -2,20 +2,20 @@
 	xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
 	xmlns:f="/lib/form">
 	<f:section title="Global Twitter Settings">
-		<f:entry title="ID">
+		<f:entry title="ID" help="/plugin/twitter/help-global-id.html">
 			<input class="setting-input" name="twitter.id" type="text"
 				value="${descriptor.id}" />
 		</f:entry>
-		<f:entry title="Password">
+		<f:entry title="Password" help="/plugin/twitter/help-global-password.html">
 			<input class="setting-input" name="twitter.password"
 				type="password" value="${descriptor.password}" />
 		</f:entry>
 		
-		<f:entry title="Only Tweet on Failure or Recovery?">
+		<f:entry title="Only Tweet on Failure or Recovery?" help="/plugin/twitter/help-global-failure.html">
 		    <f:checkbox name="twitter.onlyOnFailureOrRecovery" checked="${descriptor.onlyOnFailureOrRecovery}" />
 		</f:entry>
 		
-		<f:entry title="Include the Build URL in the Tweet?">
+		<f:entry title="Include the Build URL in the Tweet?" help="/plugin/twitter/help-global-url.html">
 		    <f:checkbox name="twitter.includeUrl" checked="${descriptor.includeUrl}" />
 		</f:entry>
 		
