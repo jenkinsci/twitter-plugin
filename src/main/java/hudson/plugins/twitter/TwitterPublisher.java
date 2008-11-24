@@ -2,10 +2,11 @@ package hudson.plugins.twitter;
 
 import hudson.Functions;
 import hudson.Launcher;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
 import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
-import hudson.model.Project;
 import hudson.model.Result;
 import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
@@ -37,15 +38,11 @@ import twitter4j.TwitterException;
 public class TwitterPublisher extends Publisher {
 
     public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
-
     private static final Logger LOGGER = Logger.getLogger(TwitterPublisher.class.getName());
 
     private String id;
-
     private String password;
-
     private Boolean onlyOnFailureOrRecovery;
-
     private Boolean includeUrl;
 
     /**
@@ -94,18 +91,11 @@ public class TwitterPublisher extends Publisher {
         return password;
     }
 
-    /**
-     * This bit of generics hackery is taken from the hudson.tasks.MailSender
-     * class.
-     * 
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean perform(Build build, Launcher launcher, BuildListener listener) {
-        return _perform(build, launcher, listener);
+    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
+    	return _perform(build, launcher, listener);
     }
 
-    protected <P extends Project<P, B>, B extends Build<P, B>> boolean _perform(B build,
+    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean _perform(B build,
             Launcher launcher, BuildListener listener) {
         if (shouldTweet(build)) {
 
@@ -131,13 +121,13 @@ public class TwitterPublisher extends Publisher {
 
     }
 
-    protected <P extends Project<P, B>, B extends Build<P, B>> String createStatusWithoutURL(B build) {
+    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String createStatusWithoutURL(B build) {
         String projectName = build.getProject().getName();
         String result = build.getResult().toString();
         return String.format("%s:%s #%d", result, projectName, build.number);
     }
 
-    protected <P extends Project<P, B>, B extends Build<P, B>> String createStatusWithURL(B build)
+    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String createStatusWithURL(B build)
             throws IOException {
         String projectName = build.getProject().getName();
         String result = build.getResult().toString();
@@ -156,7 +146,7 @@ public class TwitterPublisher extends Publisher {
      *            the Build object
      * @return true if this build represents a recovery or failure
      */
-    protected <P extends Project<P, B>, B extends Build<P, B>> boolean isFailureOrRecovery(B build) {
+    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean isFailureOrRecovery(B build) {
         if (build.getResult() == Result.FAILURE || build.getResult() == Result.UNSTABLE) {
             return true;
         } else if (build.getResult() == Result.SUCCESS) {
@@ -187,7 +177,7 @@ public class TwitterPublisher extends Publisher {
      *            the Build object
      * @return true if we should tweet this build result
      */
-    protected <P extends Project<P, B>, B extends Build<P, B>> boolean shouldTweet(B build) {
+    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean shouldTweet(B build) {
         if (onlyOnFailureOrRecovery == null) {
             if (DESCRIPTOR.onlyOnFailureOrRecovery) {
                 return isFailureOrRecovery(build);
