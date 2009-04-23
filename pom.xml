@@ -14,7 +14,7 @@
     <description>
         Plugin for Hudson that adds tweets to Twitter (http://www.twitter.com/) for build events.
     </description>
-    <url>http://hudson.gotdns.com/wiki/display/HUDSON/Twitter+Plugin</url>
+    <url>http://wiki.hudson-ci.org/display/HUDSON/Twitter+Plugin</url>
 
     <dependencies>
         <dependency>
