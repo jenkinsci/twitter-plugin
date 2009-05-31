@@ -1,10 +1,10 @@
 package hudson.plugins.twitter;
 
+import hudson.Extension;
 import hudson.Functions;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Build;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.Result;
@@ -45,9 +45,6 @@ public class TwitterPublisher extends Publisher {
     private Boolean onlyOnFailureOrRecovery;
     private Boolean includeUrl;
 
-    /**
-     * {@stapler-constructor}
-     */
     @DataBoundConstructor
     public TwitterPublisher(String id, String password, Boolean onlyOnFailureOrRecovery,
             Boolean includeUrl) {
@@ -92,11 +89,11 @@ public class TwitterPublisher extends Publisher {
     }
 
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
-    	return _perform(build, launcher, listener);
+        return _perform(build, launcher, listener);
     }
 
-    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean _perform(B build,
-            Launcher launcher, BuildListener listener) {
+    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean _perform(
+            B build, Launcher launcher, BuildListener listener) {
         if (shouldTweet(build)) {
 
             String newStatus = null;
@@ -121,14 +118,15 @@ public class TwitterPublisher extends Publisher {
 
     }
 
-    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String createStatusWithoutURL(B build) {
+    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String createStatusWithoutURL(
+            B build) {
         String projectName = build.getProject().getName();
         String result = build.getResult().toString();
         return String.format("%s:%s #%d", result, projectName, build.number);
     }
 
-    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String createStatusWithURL(B build)
-            throws IOException {
+    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String createStatusWithURL(
+            B build) throws IOException {
         String projectName = build.getProject().getName();
         String result = build.getResult().toString();
         String absoluteBuildURL = DESCRIPTOR.getUrl() + build.getUrl();
@@ -142,11 +140,11 @@ public class TwitterPublisher extends Publisher {
      * successful build that follows a build that was not successful. Always
      * returns false for aborted builds.
      * 
-     * @param build
-     *            the Build object
+     * @param build the Build object
      * @return true if this build represents a recovery or failure
      */
-    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean isFailureOrRecovery(B build) {
+    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean isFailureOrRecovery(
+            B build) {
         if (build.getResult() == Result.FAILURE || build.getResult() == Result.UNSTABLE) {
             return true;
         } else if (build.getResult() == Result.SUCCESS) {
@@ -173,11 +171,11 @@ public class TwitterPublisher extends Publisher {
      * Determine if this build results should be tweeted. Uses the local
      * settings if they are provided, otherwise the global settings.
      * 
-     * @param build
-     *            the Build object
+     * @param build the Build object
      * @return true if we should tweet this build result
      */
-    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean shouldTweet(B build) {
+    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean shouldTweet(
+            B build) {
         if (onlyOnFailureOrRecovery == null) {
             if (DESCRIPTOR.onlyOnFailureOrRecovery) {
                 return isFailureOrRecovery(build);
@@ -191,6 +189,7 @@ public class TwitterPublisher extends Publisher {
         }
     }
 
+    @Extension
     public static final class DescriptorImpl extends Descriptor<Publisher> {
         private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class.getName());
 
@@ -204,7 +203,7 @@ public class TwitterPublisher extends Publisher {
 
         private Class<? extends AsyncTwitter> asyncTwitterClass = AsyncTwitter.class;
 
-        protected DescriptorImpl() {
+        public DescriptorImpl() {
             super(TwitterPublisher.class);
             load();
         }
@@ -212,8 +211,7 @@ public class TwitterPublisher extends Publisher {
         /**
          * Clean up the formData object by removing blanks and (Default) values.
          * 
-         * @param formData
-         *            the incoming form data
+         * @param formData the incoming form data
          * @return a new cleaned JSONObject object
          */
         protected static JSONObject cleanJSON(JSONObject formData) {
@@ -238,7 +236,7 @@ public class TwitterPublisher extends Publisher {
             onlyOnFailureOrRecovery = false;
 
             req.bindParameters(this, "twitter.");
-            hudsonUrl = Mailer.DESCRIPTOR.getUrl();
+            hudsonUrl = Mailer.descriptor().getUrl();
             save();
             return super.configure(req);
         }
