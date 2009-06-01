@@ -1,18 +1,17 @@
 package hudson.plugins.twitter;
 
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
+import hudson.plugins.twitter.TwitterPublisher.DescriptorImpl;
+
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.jvnet.hudson.test.HudsonTestCase;
 
-public class ShouldIncludeURLTest {
+public class ShouldIncludeURLTest extends HudsonTestCase {
 
-    @Test
     public void testTrueInDescriptor() throws Exception {
-        TwitterPublisher pub = new TwitterPublisher(null, null, null, null);
+        DescriptorImpl descriptor = hudson.getDescriptorByType(DescriptorImpl.class);
+        descriptor.includeUrl = true;
 
-        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "includeUrl", true);
+        TwitterPublisher pub = new TwitterPublisher(null, null, null, null);
         Assert.assertTrue(pub.shouldIncludeUrl());
 
         ReflectionHelper.setField(pub, "includeUrl", Boolean.FALSE);
@@ -22,11 +21,12 @@ public class ShouldIncludeURLTest {
         Assert.assertTrue(pub.shouldIncludeUrl());
     }
 
-    @Test
     public void testFalseInDescriptor() throws Exception {
+        DescriptorImpl descriptor = hudson.getDescriptorByType(DescriptorImpl.class);
+        descriptor.includeUrl = false;
+
         TwitterPublisher pub = new TwitterPublisher(null, null, null, null);
 
-        ReflectionHelper.setField(TwitterPublisher.DESCRIPTOR, "includeUrl", false);
         Assert.assertFalse(pub.shouldIncludeUrl());
 
         ReflectionHelper.setField(pub, "includeUrl", Boolean.FALSE);
@@ -34,17 +34,6 @@ public class ShouldIncludeURLTest {
 
         ReflectionHelper.setField(pub, "includeUrl", Boolean.TRUE);
         Assert.assertTrue(pub.shouldIncludeUrl());
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        HudsonUtil.init();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        HudsonUtil.hudson.cleanUp();
-        FileUtils.deleteDirectory(HudsonUtil.root);
     }
 
 }
