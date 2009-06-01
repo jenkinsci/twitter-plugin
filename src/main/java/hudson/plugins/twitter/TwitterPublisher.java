@@ -8,6 +8,9 @@ import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.model.Descriptor;
 import hudson.model.Result;
+import hudson.model.User;
+import hudson.scm.ChangeLogSet;
+import hudson.scm.ChangeLogSet.Entry;
 import hudson.tasks.Mailer;
 import hudson.tasks.Publisher;
 
@@ -15,6 +18,7 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,7 +41,9 @@ import twitter4j.TwitterException;
  */
 public class TwitterPublisher extends Publisher {
 
-    public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
+    private static final List<String> VALUES_REPLACED_WITH_NULL = Arrays.asList("", "(Default)",
+            "(System Default)");
+
     private static final Logger LOGGER = Logger.getLogger(TwitterPublisher.class.getName());
 
     private String id;
@@ -45,13 +51,28 @@ public class TwitterPublisher extends Publisher {
     private Boolean onlyOnFailureOrRecovery;
     private Boolean includeUrl;
 
-    @DataBoundConstructor
-    public TwitterPublisher(String id, String password, Boolean onlyOnFailureOrRecovery,
+    private TwitterPublisher(String id, String password, Boolean onlyOnFailureOrRecovery,
             Boolean includeUrl) {
         this.onlyOnFailureOrRecovery = onlyOnFailureOrRecovery;
         this.includeUrl = includeUrl;
         this.id = id;
         this.password = password;
+    }
+
+    @DataBoundConstructor
+    public TwitterPublisher(String id, String password, String onlyOnFailureOrRecovery,
+            String includeUrl) {
+        this(cleanToString(id), cleanToString(password), cleanToBoolean(onlyOnFailureOrRecovery),
+                cleanToBoolean(includeUrl));
+    }
+
+    private static String cleanToString(String string) {
+        return VALUES_REPLACED_WITH_NULL.contains(string) ? null : string;
+    }
+
+    private static Boolean cleanToBoolean(String string) {
+        return (VALUES_REPLACED_WITH_NULL.contains(string) || string == null) ? null : Boolean
+                .valueOf(string);
     }
 
     private static String createTinyUrl(String url) throws IOException {
@@ -66,10 +87,6 @@ public class TwitterPublisher extends Publisher {
             throw new IOException("Non-OK response code back from tinyurl: " + status);
         }
 
-    }
-
-    public Descriptor<Publisher> getDescriptor() {
-        return DESCRIPTOR;
     }
 
     public String getId() {
@@ -95,27 +112,64 @@ public class TwitterPublisher extends Publisher {
     protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean _perform(
             B build, Launcher launcher, BuildListener listener) {
         if (shouldTweet(build)) {
-
-            String newStatus = null;
-            if (shouldIncludeUrl()) {
-                try {
-                    newStatus = createStatusWithURL(build);
-                } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "Unable to tinyfy url", e);
-                    newStatus = createStatusWithoutURL(build);
-                }
-            } else {
-                newStatus = createStatusWithoutURL(build);
-            }
-
             try {
-                DESCRIPTOR.updateTwit(id, password, newStatus);
+                String newStatus = createTwitterStatusMessage(build);
+                ((DescriptorImpl) getDescriptor()).updateTwit(id, password, newStatus);
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Unable to send tweet.", e);
             }
         }
         return true;
 
+    }
+
+    private <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String createTwitterStatusMessage(
+            B build) {
+        String projectName = build.getProject().getName();
+        String result = build.getResult().toString();
+        String toblame = "";
+        try {
+            if (!build.getResult().equals(Result.SUCCESS)) {
+                toblame = getUserString(build);
+            }
+        } catch (Exception e) {
+        }
+        String tinyUrl = "";
+        if (shouldIncludeUrl()) {
+            String absoluteBuildURL = ((DescriptorImpl) getDescriptor()).getUrl() + build.getUrl();
+            try {
+                tinyUrl = createTinyUrl(absoluteBuildURL);
+            } catch (Exception e) {
+                tinyUrl = "?";
+            }
+        }
+        return String.format("%s%s:%s#%d - %s", toblame, result.substring(0, 4), projectName,
+                build.number, tinyUrl);
+
+    }
+
+    private <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getUserString(
+            B build) throws IOException {
+        StringBuilder userString = new StringBuilder("");
+        Set<User> culprits = build.getCulprits();
+        ChangeLogSet<? extends Entry> changeSet = build.getChangeSet();
+        if (culprits.size() > 0) {
+            for (User user : culprits) {
+                UserTwitterProperty tid = user.getProperty(UserTwitterProperty.class);
+                if (tid.getTwitterid() != null) {
+                    userString.append("@").append(tid.getTwitterid()).append(" ");
+                }
+            }
+        } else if (changeSet != null) {
+            for (Entry entry : changeSet) {
+                User user = entry.getAuthor();
+                UserTwitterProperty tid = user.getProperty(UserTwitterProperty.class);
+                if (tid.getTwitterid() != null) {
+                    userString.append("@").append(tid.getTwitterid()).append(" ");
+                }
+            }
+        }
+        return userString.toString();
     }
 
     protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String createStatusWithoutURL(
@@ -129,7 +183,7 @@ public class TwitterPublisher extends Publisher {
             B build) throws IOException {
         String projectName = build.getProject().getName();
         String result = build.getResult().toString();
-        String absoluteBuildURL = DESCRIPTOR.getUrl() + build.getUrl();
+        String absoluteBuildURL = ((DescriptorImpl) getDescriptor()).getUrl() + build.getUrl();
         String tinyUrl = createTinyUrl(absoluteBuildURL);
         return String.format("%s:%s #%d - %s", result, projectName, build.number, tinyUrl);
     }
@@ -163,7 +217,7 @@ public class TwitterPublisher extends Publisher {
         if (includeUrl != null) {
             return includeUrl.booleanValue();
         } else {
-            return DESCRIPTOR.includeUrl;
+            return ((DescriptorImpl) getDescriptor()).includeUrl;
         }
     }
 
@@ -177,7 +231,7 @@ public class TwitterPublisher extends Publisher {
     protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean shouldTweet(
             B build) {
         if (onlyOnFailureOrRecovery == null) {
-            if (DESCRIPTOR.onlyOnFailureOrRecovery) {
+            if (((DescriptorImpl) getDescriptor()).onlyOnFailureOrRecovery) {
                 return isFailureOrRecovery(build);
             } else {
                 return true;
@@ -193,8 +247,6 @@ public class TwitterPublisher extends Publisher {
     public static final class DescriptorImpl extends Descriptor<Publisher> {
         private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class.getName());
 
-        private static final List<String> VALUES_REPLACED_WITH_NULL = Arrays.asList("",
-                "(Default)", "(System Default)");
         public String id;
         public String password;
         public String hudsonUrl;
@@ -206,27 +258,6 @@ public class TwitterPublisher extends Publisher {
         public DescriptorImpl() {
             super(TwitterPublisher.class);
             load();
-        }
-
-        /**
-         * Clean up the formData object by removing blanks and (Default) values.
-         * 
-         * @param formData the incoming form data
-         * @return a new cleaned JSONObject object
-         */
-        protected static JSONObject cleanJSON(JSONObject formData) {
-            JSONObject cleaned = new JSONObject();
-            for (Object key : formData.keySet()) {
-                Object o = formData.get(key);
-                if (o instanceof String) {
-                    if (!VALUES_REPLACED_WITH_NULL.contains(o)) {
-                        cleaned.put(key, o);
-                    }
-                } else {
-                    cleaned.put(key, o);
-                }
-            }
-            return cleaned;
         }
 
         @Override
@@ -268,14 +299,12 @@ public class TwitterPublisher extends Publisher {
 
         @Override
         public Publisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            JSONObject cleanedFormData = cleanJSON(formData);
             if (hudsonUrl == null) {
                 // if Hudson URL is not configured yet, infer some default
                 hudsonUrl = Functions.inferHudsonURL(req);
                 save();
             }
-            Publisher publisher = req.bindJSON(clazz, cleanedFormData);
-            return publisher;
+            return super.newInstance(req, formData);
         }
 
         public void updateTwit(String id, String password, String message) throws Exception {
