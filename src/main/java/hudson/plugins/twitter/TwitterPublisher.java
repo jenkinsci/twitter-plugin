@@ -6,12 +6,14 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
-import hudson.model.Descriptor;
 import hudson.model.Result;
 import hudson.model.User;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.Entry;
+import hudson.tasks.BuildStepDescriptor;
+import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Mailer;
+import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 
 import java.io.IOException;
@@ -39,7 +41,7 @@ import twitter4j.TwitterException;
  * @author cactusman
  * @author justinedelson
  */
-public class TwitterPublisher extends Publisher {
+public class TwitterPublisher extends Notifier {
 
     private static final List<String> VALUES_REPLACED_WITH_NULL = Arrays.asList("", "(Default)",
             "(System Default)");
@@ -103,6 +105,10 @@ public class TwitterPublisher extends Publisher {
 
     public String getPassword() {
         return password;
+    }
+
+    public BuildStepMonitor getRequiredMonitorService() {
+        return BuildStepMonitor.BUILD;
     }
 
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
@@ -244,7 +250,7 @@ public class TwitterPublisher extends Publisher {
     }
 
     @Extension
-    public static final class DescriptorImpl extends Descriptor<Publisher> {
+    public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class.getName());
 
         public String id;
@@ -261,7 +267,7 @@ public class TwitterPublisher extends Publisher {
         }
 
         @Override
-        public boolean configure(StaplerRequest req) throws FormException {
+        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             // set the booleans to false as defaults
             includeUrl = false;
             onlyOnFailureOrRecovery = false;
@@ -269,7 +275,7 @@ public class TwitterPublisher extends Publisher {
             req.bindParameters(this, "twitter.");
             hudsonUrl = Mailer.descriptor().getUrl();
             save();
-            return super.configure(req);
+            return super.configure(req, formData);
         }
 
         @Override
@@ -295,6 +301,11 @@ public class TwitterPublisher extends Publisher {
 
         public boolean isOnlyOnFailureOrRecovery() {
             return onlyOnFailureOrRecovery;
+        }
+
+        @Override
+        public boolean isApplicable(Class<? extends AbstractProject> jobType) {
+            return true;
         }
 
         @Override
