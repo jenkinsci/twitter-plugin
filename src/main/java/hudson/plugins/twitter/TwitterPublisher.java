@@ -111,13 +111,9 @@ public class TwitterPublisher extends Notifier {
         return BuildStepMonitor.BUILD;
     }
 
-    public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
-        return _perform(build, launcher, listener);
-    }
-
-    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean _perform(
-            B build, Launcher launcher, BuildListener listener) {
-        if (shouldTweet(build)) {
+    @Override
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+    	if (shouldTweet(build)) {
             try {
                 String newStatus = createTwitterStatusMessage(build);
                 ((DescriptorImpl) getDescriptor()).updateTwit(id, password, newStatus);
@@ -126,11 +122,9 @@ public class TwitterPublisher extends Notifier {
             }
         }
         return true;
-
     }
 
-    private <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String createTwitterStatusMessage(
-            B build) {
+    private String createTwitterStatusMessage(AbstractBuild<?, ?> build) {
         String projectName = build.getProject().getName();
         String result = build.getResult().toString();
         String toblame = "";
@@ -154,8 +148,7 @@ public class TwitterPublisher extends Notifier {
 
     }
 
-    private <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String getUserString(
-            B build) throws IOException {
+    private String getUserString(AbstractBuild<?, ?> build) throws IOException {
         StringBuilder userString = new StringBuilder("");
         Set<User> culprits = build.getCulprits();
         ChangeLogSet<? extends Entry> changeSet = build.getChangeSet();
@@ -199,16 +192,15 @@ public class TwitterPublisher extends Notifier {
      * includes both failed and unstable builds. A recovery is defined as a
      * successful build that follows a build that was not successful. Always
      * returns false for aborted builds.
-     * 
+     *
      * @param build the Build object
      * @return true if this build represents a recovery or failure
      */
-    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean isFailureOrRecovery(
-            B build) {
+    protected boolean isFailureOrRecovery(AbstractBuild<?, ?> build) {
         if (build.getResult() == Result.FAILURE || build.getResult() == Result.UNSTABLE) {
             return true;
         } else if (build.getResult() == Result.SUCCESS) {
-            B previousBuild = build.getPreviousBuild();
+        	AbstractBuild<?, ?> previousBuild = build.getPreviousBuild();
             if (previousBuild != null && previousBuild.getResult() != Result.SUCCESS) {
                 return true;
             } else {
@@ -230,12 +222,11 @@ public class TwitterPublisher extends Notifier {
     /**
      * Determine if this build results should be tweeted. Uses the local
      * settings if they are provided, otherwise the global settings.
-     * 
+     *
      * @param build the Build object
      * @return true if we should tweet this build result
      */
-    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> boolean shouldTweet(
-            B build) {
+    protected boolean shouldTweet(AbstractBuild<?, ?> build) {
         if (onlyOnFailureOrRecovery == null) {
             if (((DescriptorImpl) getDescriptor()).onlyOnFailureOrRecovery) {
                 return isFailureOrRecovery(build);
@@ -248,7 +239,7 @@ public class TwitterPublisher extends Notifier {
             return true;
         }
     }
-
+    
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class.getName());
@@ -303,7 +294,8 @@ public class TwitterPublisher extends Notifier {
             return onlyOnFailureOrRecovery;
         }
 
-        @Override
+        @SuppressWarnings("unchecked")
+		@Override
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
             return true;
         }
@@ -327,9 +319,8 @@ public class TwitterPublisher extends Notifier {
             LOGGER.info("Attempting to update Twitter status to: " + message);
 
             AsyncTwitter twitter = createAsyncTwitter(id, password);
-            twitter.updateAsync(message, new TwitterAdapter() {
-
-                @Override
+            twitter.updateStatusAsync(message, new TwitterAdapter() {
+            	@Override
                 public void onException(TwitterException e, int method) {
                     LOGGER.warning("Exception updating Twitter status: " + e.toString());
                 }
@@ -338,7 +329,6 @@ public class TwitterPublisher extends Notifier {
                 public void updated(Status statuses) {
                     LOGGER.info("Updated Twitter status: " + statuses.getText());
                 }
-
             });
         }
 
