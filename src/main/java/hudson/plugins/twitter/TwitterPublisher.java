@@ -143,7 +143,7 @@ public class TwitterPublisher extends Notifier {
                 tinyUrl = "?";
             }
         }
-        return String.format("%s%s:%s#%d - %s", toblame, result.substring(0, 4), projectName,
+        return String.format("%s%s:%s#%d - %s", toblame, result.toString(), projectName,
                 build.number, tinyUrl);
 
     }
@@ -188,7 +188,7 @@ public class TwitterPublisher extends Notifier {
     }
 
     /**
-     * Detrmine if this build represents a failure or recovery. A build failure
+     * Determine if this build represents a failure or recovery. A build failure
      * includes both failed and unstable builds. A recovery is defined as a
      * successful build that follows a build that was not successful. Always
      * returns false for aborted builds.
@@ -249,8 +249,6 @@ public class TwitterPublisher extends Notifier {
         public String hudsonUrl;
         public boolean onlyOnFailureOrRecovery;
         public boolean includeUrl;
-
-        private Class<? extends AsyncTwitter> asyncTwitterClass = AsyncTwitter.class;
 
         public DescriptorImpl() {
             super(TwitterPublisher.class);
@@ -318,7 +316,7 @@ public class TwitterPublisher extends Notifier {
 
             LOGGER.info("Attempting to update Twitter status to: " + message);
 
-            AsyncTwitter twitter = createAsyncTwitter(id, password);
+            AsyncTwitter twitter = new AsyncTwitter(id,password);
             twitter.updateStatusAsync(message, new TwitterAdapter() {
             	@Override
                 public void onException(TwitterException e, int method) {
@@ -330,13 +328,6 @@ public class TwitterPublisher extends Notifier {
                     LOGGER.info("Updated Twitter status: " + statuses.getText());
                 }
             });
-        }
-
-        private AsyncTwitter createAsyncTwitter(String id, String password) throws Exception {
-            Constructor<? extends AsyncTwitter> con = asyncTwitterClass.getConstructor(
-                    String.class, String.class);
-
-            return con.newInstance(id, password);
         }
     }
 }
