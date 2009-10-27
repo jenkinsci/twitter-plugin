@@ -17,7 +17,6 @@ import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -73,8 +72,13 @@ public class TwitterPublisher extends Notifier {
     }
 
     private static Boolean cleanToBoolean(String string) {
-        return (VALUES_REPLACED_WITH_NULL.contains(string) || string == null) ? null : Boolean
-                .valueOf(string);
+    	Boolean result = null;
+    	if ("true".equals(string) || "Yes".equals(string)) {
+    		result = Boolean.TRUE;
+    	} else if ("false".equals(string) || "No".equals(string)) {
+    		result = Boolean.FALSE;
+    	}
+    	return result;
     }
 
     private static String createTinyUrl(String url) throws IOException {
@@ -171,22 +175,6 @@ public class TwitterPublisher extends Notifier {
         return userString.toString();
     }
 
-    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String createStatusWithoutURL(
-            B build) {
-        String projectName = build.getProject().getName();
-        String result = build.getResult().toString();
-        return String.format("%s:%s #%d", result, projectName, build.number);
-    }
-
-    protected <P extends AbstractProject<P, B>, B extends AbstractBuild<P, B>> String createStatusWithURL(
-            B build) throws IOException {
-        String projectName = build.getProject().getName();
-        String result = build.getResult().toString();
-        String absoluteBuildURL = ((DescriptorImpl) getDescriptor()).getUrl() + build.getUrl();
-        String tinyUrl = createTinyUrl(absoluteBuildURL);
-        return String.format("%s:%s #%d - %s", result, projectName, build.number, tinyUrl);
-    }
-
     /**
      * Determine if this build represents a failure or recovery. A build failure
      * includes both failed and unstable builds. A recovery is defined as a
@@ -239,7 +227,7 @@ public class TwitterPublisher extends Notifier {
             return true;
         }
     }
-    
+
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class.getName());
