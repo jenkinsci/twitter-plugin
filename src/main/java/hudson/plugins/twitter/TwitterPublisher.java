@@ -147,9 +147,7 @@ public class TwitterPublisher extends Notifier {
                 tinyUrl = "?";
             }
         }
-        return String.format("%s%s:%s#%d - %s", toblame, result.toString(), projectName,
-                build.number, tinyUrl);
-
+        return String.format("%s%s:%s $%d - %s", toblame, result, projectName, build.number, tinyUrl);
     }
 
     private String getUserString(AbstractBuild<?, ?> build) throws IOException {
