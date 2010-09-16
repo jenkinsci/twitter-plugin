@@ -216,8 +216,8 @@ public class TwitterPublisher extends Notifier {
 	public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
 		private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class.getName());
 
-		public static final String CONSUMER_KEY = "8B6nAb0a5QScWxROd5oWA";;
-		public static final String CONSUMER_SECRET = "pXO0lgCZYUvix7Ay7YLdsIep38VBiH2cTldOeMj1J5s";
+		private static final String CONSUMER_KEY = "8B6nAb0a5QScWxROd5oWA";;
+		private static final String CONSUMER_SECRET = "pXO0lgCZYUvix7Ay7YLdsIep38VBiH2cTldOeMj1J5s";
 		
 		public String token;
 		public String tokenSecret;

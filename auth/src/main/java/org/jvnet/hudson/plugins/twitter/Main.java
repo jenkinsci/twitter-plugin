@@ -1,4 +1,4 @@
-package hudson.plugins.twitter;
+package org.jvnet.hudson.plugins.twitter;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -10,9 +10,12 @@ import twitter4j.http.AccessToken;
 import twitter4j.http.RequestToken;
 
 public class Main {
+	private static final String CONSUMER_KEY = "8B6nAb0a5QScWxROd5oWA";;
+	private static final String CONSUMER_SECRET = "pXO0lgCZYUvix7Ay7YLdsIep38VBiH2cTldOeMj1J5s";
+	
 	public static void main(String[] args) throws Exception {
 		Twitter twitter = new TwitterFactory().getInstance();
-		twitter.setOAuthConsumer(TwitterPublisher.DescriptorImpl.CONSUMER_KEY, TwitterPublisher.DescriptorImpl.CONSUMER_SECRET);
+		twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
 		RequestToken requestToken = twitter.getOAuthRequestToken();
 		AccessToken accessToken = null;
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
