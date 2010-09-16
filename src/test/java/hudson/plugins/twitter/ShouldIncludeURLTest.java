@@ -11,7 +11,7 @@ public class ShouldIncludeURLTest extends HudsonTestCase {
         DescriptorImpl descriptor = hudson.getDescriptorByType(DescriptorImpl.class);
         descriptor.includeUrl = true;
 
-        TwitterPublisher pub = new TwitterPublisher(null, null, null, null);
+        TwitterPublisher pub = new TwitterPublisher(null, null);
         Assert.assertTrue(pub.shouldIncludeUrl());
 
         ReflectionHelper.setField(pub, "includeUrl", Boolean.FALSE);
@@ -25,7 +25,7 @@ public class ShouldIncludeURLTest extends HudsonTestCase {
         DescriptorImpl descriptor = hudson.getDescriptorByType(DescriptorImpl.class);
         descriptor.includeUrl = false;
 
-        TwitterPublisher pub = new TwitterPublisher(null, null, null, null);
+        TwitterPublisher pub = new TwitterPublisher(null, null);
 
         Assert.assertFalse(pub.shouldIncludeUrl());
 
