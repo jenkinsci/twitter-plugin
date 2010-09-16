@@ -299,9 +299,7 @@ public class TwitterPublisher extends Notifier {
 					LOGGER.info("Updated Twitter status: " + statuses.getText());
 				}
 			});
-			System.out.println(token +":"+ tokenSecret);
 			AccessToken accessToken = new AccessToken(token, tokenSecret);
-			System.out.println(accessToken);
 			AsyncTwitter twitter =  factory.getOAuthAuthorizedInstance(CONSUMER_KEY, CONSUMER_SECRET, accessToken);
 			twitter.updateStatus(message);
 		}
