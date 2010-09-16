@@ -9,7 +9,7 @@
 
 	<artifactId>twitter</artifactId>
 	<packaging>hpi</packaging>
-	<version>0.6</version>
+	<version>0.7-SNAPSHOT</version>
 	<name>Twitter plugin</name>
 	<description>
         Plugin for Hudson that adds tweets to Twitter (http://www.twitter.com/) for build events.
@@ -70,10 +70,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-  <scm>
-    <connection>scm:svn:https://guest@svn.dev.java.net/svn/hudson/tags/twitter-0.6</connection>
-    <developerConnection>scm:svn:https://svn.dev.java.net/svn/hudson/tags/twitter-0.6</developerConnection>
-    <url>https://hudson.dev.java.net/source/browse/hudson/tags/twitter-0.6</url>
-  </scm>
 </project>
