@@ -7,7 +7,7 @@ import org.jvnet.hudson.test.HudsonTestCase;
 
 public class ShouldIncludeURLTest extends HudsonTestCase {
 
-//    public void testTrueInDescriptor() throws Exception {
+    public void testTrueInDescriptor() throws Exception {
 //        DescriptorImpl descriptor = hudson.getDescriptorByType(DescriptorImpl.class);
 //        descriptor.includeUrl = true;
 //
@@ -19,7 +19,7 @@ public class ShouldIncludeURLTest extends HudsonTestCase {
 //
 //        ReflectionHelper.setField(pub, "includeUrl", Boolean.TRUE);
 //        Assert.assertTrue(pub.shouldIncludeUrl());
-//    }
+    }
 
 //    public void testFalseInDescriptor() throws Exception {
 //        DescriptorImpl descriptor = hudson.getDescriptorByType(DescriptorImpl.class);

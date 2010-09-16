@@ -16,14 +16,14 @@ import org.jvnet.hudson.test.HudsonTestCase;
 
 public class ShouldTweetTest extends HudsonTestCase {
 
-//    public void testWhenDescriptorTrueAndInstanceNull() throws Exception {
+    public void testWhenDescriptorTrueAndInstanceNull() throws Exception {
 //        DescriptorImpl descriptor = hudson.getDescriptorByType(DescriptorImpl.class);
 //        descriptor.onlyOnFailureOrRecovery = true;
 //
 //        TwitterPublisher pub = new TwitterPublisher(null, null);
 //
 //        assertLimitedTweets(pub);
-//    }
+    }
 //
 //    public void testWhenDescriptorTrueAndInstanceFalse() throws Exception {
 //        DescriptorImpl descriptor = hudson.getDescriptorByType(DescriptorImpl.class);
