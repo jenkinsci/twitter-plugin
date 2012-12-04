@@ -20,7 +20,7 @@ public class ShouldTweetTest extends HudsonTestCase {
         DescriptorImpl descriptor = hudson.getDescriptorByType(DescriptorImpl.class);
         descriptor.onlyOnFailureOrRecovery = true;
 
-        TwitterPublisher pub = new TwitterPublisher(null, null);
+        TwitterPublisher pub = new TwitterPublisher(null, null,null);
 
         assertLimitedTweets(pub);
     }
@@ -29,7 +29,7 @@ public class ShouldTweetTest extends HudsonTestCase {
         DescriptorImpl descriptor = hudson.getDescriptorByType(DescriptorImpl.class);
         descriptor.onlyOnFailureOrRecovery = true;
 
-        TwitterPublisher pub = new TwitterPublisher("false", null);
+        TwitterPublisher pub = new TwitterPublisher("false", null, null);
 
         assertAlwaysTweet(pub);
     }
@@ -38,7 +38,7 @@ public class ShouldTweetTest extends HudsonTestCase {
         DescriptorImpl descriptor = hudson.getDescriptorByType(DescriptorImpl.class);
         descriptor.onlyOnFailureOrRecovery = true;
 
-        TwitterPublisher pub = new TwitterPublisher("true", null);
+        TwitterPublisher pub = new TwitterPublisher("true", null, null);
 
         assertLimitedTweets(pub);
     }
@@ -47,7 +47,7 @@ public class ShouldTweetTest extends HudsonTestCase {
         DescriptorImpl descriptor = hudson.getDescriptorByType(DescriptorImpl.class);
         descriptor.onlyOnFailureOrRecovery = false;
 
-        TwitterPublisher pub = new TwitterPublisher(null, null);
+        TwitterPublisher pub = new TwitterPublisher(null, null,null);
 
         assertAlwaysTweet(pub);
     }
@@ -56,7 +56,7 @@ public class ShouldTweetTest extends HudsonTestCase {
         DescriptorImpl descriptor = hudson.getDescriptorByType(DescriptorImpl.class);
         descriptor.onlyOnFailureOrRecovery = false;
 
-        TwitterPublisher pub = new TwitterPublisher("false", null);
+        TwitterPublisher pub = new TwitterPublisher("false", null, null);
 
         assertAlwaysTweet(pub);
     }
@@ -65,7 +65,7 @@ public class ShouldTweetTest extends HudsonTestCase {
         DescriptorImpl descriptor = hudson.getDescriptorByType(DescriptorImpl.class);
         descriptor.onlyOnFailureOrRecovery = false;
 
-        TwitterPublisher pub = new TwitterPublisher("true", null);
+        TwitterPublisher pub = new TwitterPublisher("true", null, null);
 
         assertLimitedTweets(pub);
     }

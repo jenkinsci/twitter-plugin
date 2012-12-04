@@ -1,7 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
   <f:advanced>
     <f:entry title="Only Tweet on Failure or Recovery?" help="/plugin/twitter/help-project-failure.html">
-      <select class="setting-input validated" name="twitter.onlyOnFailureOrRecovery">
+      <select class="setting-input" name="twitter.onlyOnFailureOrRecovery">
           <option>(System Default)</option>
           <f:option selected="${instance.onlyOnFailureOrRecovery==true}">Yes</f:option>
           <f:option selected="${instance.onlyOnFailureOrRecovery==false}">No</f:option>
@@ -9,11 +9,14 @@
     </f:entry>
   
     <f:entry title="Include Build Url?" help="/plugin/twitter/help-project-url.html">
-      <select class="setting-input validated" name="twitter.includeUrl">
+      <select class="setting-input" name="twitter.includeUrl">
           <option>(System Default)</option>
           <f:option selected="${instance.includeUrl==true}">Yes</f:option>
           <f:option selected="${instance.includeUrl==false}">No</f:option>
         </select>
+    </f:entry>
+    <f:entry title="Content of message" help="/plugin/twitter/help-content.html">
+      <f:textbox name="content" value="${instance.content}"/>
     </f:entry>
   </f:advanced>
 </j:jelly>

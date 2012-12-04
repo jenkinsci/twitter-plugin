@@ -1,11 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.jvnet.hudson.plugins</groupId>
-		<artifactId>plugin</artifactId>
-		<version>1.365</version>
-		<relativePath>../pom.xml</relativePath>
-	</parent>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>plugin</artifactId>
+        <version>1.409</version>
+    </parent>
 
 	<artifactId>twitter</artifactId>
 	<packaging>hpi</packaging>
@@ -49,7 +48,7 @@
 		</dependency>
 		<dependency>
 			<groupId>mockobjects</groupId>
-			<artifactId>mockobjects-jdk1.4-j2ee1.3</artifactId>
+			<artifactId>mockobjects-core</artifactId>
 			<version>0.09</version>
 			<scope>test</scope>
 		</dependency>

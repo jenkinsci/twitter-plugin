@@ -3,6 +3,7 @@ package hudson.plugins.twitter;
 import hudson.Extension;
 import hudson.Functions;
 import hudson.Launcher;
+import hudson.Util;
 import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
@@ -17,8 +18,10 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Mailer;
 
 import java.io.IOException;
+import java.lang.StringBuilder;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,6 +53,7 @@ public class TwitterPublisher extends Notifier {
 
 	private Boolean onlyOnFailureOrRecovery;
 	private Boolean includeUrl;
+        private String content;
 
 	private TwitterPublisher(Boolean onlyOnFailureOrRecovery, Boolean includeUrl) {
 		this.onlyOnFailureOrRecovery = onlyOnFailureOrRecovery;
@@ -57,13 +61,18 @@ public class TwitterPublisher extends Notifier {
 	}
 
 	@DataBoundConstructor
-	public TwitterPublisher(String onlyOnFailureOrRecovery,	String includeUrl) {
+	public TwitterPublisher(String onlyOnFailureOrRecovery,	String includeUrl, String content) {
 		this(cleanToBoolean(onlyOnFailureOrRecovery), cleanToBoolean(includeUrl));
+                this.content = Util.fixEmpty(content);
 	}
 
 	private static String cleanToString(String string) {
 		return VALUES_REPLACED_WITH_NULL.contains(string) ? null : string;
 	}
+        
+        public String getContent(){
+            return content;
+        }
 
 	private static Boolean cleanToBoolean(String string) {
 		Boolean result = null;
@@ -100,12 +109,22 @@ public class TwitterPublisher extends Notifier {
 	public BuildStepMonitor getRequiredMonitorService() {
 		return BuildStepMonitor.BUILD;
 	}
+        
+        public String replaceVariables(String content, Map<String,String> variables){
+            return Util.replaceMacro(content, variables);
+        }
 
 	@Override
 	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
 		if (shouldTweet(build)) {
 			try {
-				String newStatus = createTwitterStatusMessage(build);
+				String newStatus = null;
+                                if(content!=null){
+                                    newStatus = replaceVariables(content,build.getEnvironment(listener));
+                                }
+                                else{
+                                    newStatus = createTwitterStatusMessage(build);
+                                }
 				((DescriptorImpl) getDescriptor()).updateTwit(newStatus);
 			} catch (Exception e) {
 				LOGGER.log(Level.SEVERE, "Unable to send tweet.", e);
