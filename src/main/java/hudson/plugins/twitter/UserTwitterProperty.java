@@ -1,5 +1,6 @@
 package hudson.plugins.twitter;
 
+import hudson.Extension;
 import hudson.model.User;
 import hudson.model.UserProperty;
 import hudson.model.UserPropertyDescriptor;
@@ -48,6 +49,7 @@ public class UserTwitterProperty extends UserProperty {
         this.twitterid = twitterid;
     }
 
+    @Extension
     public static final class DescriptorImpl extends UserPropertyDescriptor {
         public DescriptorImpl() {
             super(UserTwitterProperty.class);
