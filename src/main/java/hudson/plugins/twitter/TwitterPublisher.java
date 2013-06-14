@@ -37,11 +37,12 @@ import twitter4j.Status;
 import twitter4j.TwitterAdapter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterMethod;
-import twitter4j.http.AccessToken;
+import twitter4j.auth.AccessToken;
 
 /**
  * @author cactusman
  * @author justinedelson
+ * @author mikesir87
  */
 public class TwitterPublisher extends Notifier {
 	private static final List<String> VALUES_REPLACED_WITH_NULL = Arrays.asList("", "(Default)", "(System Default)");
@@ -288,7 +289,10 @@ public class TwitterPublisher extends Notifier {
 		public void updateTwit(String message) throws Exception {
 			LOGGER.info("Attempting to update Twitter status to: " + message);
 
-			AsyncTwitterFactory factory = new AsyncTwitterFactory(new TwitterAdapter() {
+			AsyncTwitterFactory factory = new AsyncTwitterFactory();
+			AccessToken accessToken = new AccessToken(token, tokenSecret);
+			AsyncTwitter twitter =  factory.getInstance(accessToken);
+			twitter.addListener(new TwitterAdapter() {
 				@Override
 				public void onException(TwitterException e, TwitterMethod method) {
 					LOGGER.warning("Exception updating Twitter status: " + e.toString());
@@ -299,8 +303,6 @@ public class TwitterPublisher extends Notifier {
 					LOGGER.info("Updated Twitter status: " + statuses.getText());
 				}
 			});
-			AccessToken accessToken = new AccessToken(token, tokenSecret);
-			AsyncTwitter twitter =  factory.getOAuthAuthorizedInstance(CONSUMER_KEY, CONSUMER_SECRET, accessToken);
 			twitter.updateStatus(message);
 		}
 		

@@ -6,13 +6,14 @@ import java.io.InputStreamReader;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
-import twitter4j.http.AccessToken;
-import twitter4j.http.RequestToken;
+import twitter4j.auth.AccessToken;
+import twitter4j.auth.RequestToken;
 
 public class Main {
 	private static final String CONSUMER_KEY = "8B6nAb0a5QScWxROd5oWA";;
 	private static final String CONSUMER_SECRET = "pXO0lgCZYUvix7Ay7YLdsIep38VBiH2cTldOeMj1J5s";
 	
+
 	public static void main(String[] args) throws Exception {
 		Twitter twitter = new TwitterFactory().getInstance();
 		twitter.setOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
@@ -42,7 +43,7 @@ public class Main {
 		storeAccessToken(twitter.verifyCredentials().getId() , accessToken);
 		System.exit(0);
 	}
-	private static void storeAccessToken(int useId, AccessToken accessToken){
+	private static void storeAccessToken(long useId, AccessToken accessToken){
 		System.out.println("access token:" + accessToken.getToken());
 		System.out.println("access token secret:" + accessToken.getTokenSecret());
 	}
