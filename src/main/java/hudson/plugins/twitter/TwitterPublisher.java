@@ -38,6 +38,8 @@ import twitter4j.TwitterAdapter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterMethod;
 import twitter4j.auth.AccessToken;
+import twitter4j.auth.OAuthAuthorization;
+import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * @author cactusman
@@ -290,8 +292,16 @@ public class TwitterPublisher extends Notifier {
 			LOGGER.info("Attempting to update Twitter status to: " + message);
 
 			AsyncTwitterFactory factory = new AsyncTwitterFactory();
-			AccessToken accessToken = new AccessToken(token, tokenSecret);
-			AsyncTwitter twitter =  factory.getInstance(accessToken);
+			AsyncTwitter twitter =  factory.getInstance(
+					new OAuthAuthorization(
+							new ConfigurationBuilder()
+							.setOAuthConsumerKey(CONSUMER_KEY)
+							.setOAuthConsumerSecret(CONSUMER_SECRET)
+							.setOAuthAccessToken(token)
+							.setOAuthAccessTokenSecret(tokenSecret)
+							.build()
+					)
+			);			
 			twitter.addListener(new TwitterAdapter() {
 				@Override
 				public void onException(TwitterException e, TwitterMethod method) {
