@@ -17,8 +17,6 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Mailer;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,7 +35,6 @@ import twitter4j.Status;
 import twitter4j.TwitterAdapter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterMethod;
-import twitter4j.auth.AccessToken;
 import twitter4j.auth.OAuthAuthorization;
 import twitter4j.conf.ConfigurationBuilder;
 
@@ -47,9 +44,9 @@ import twitter4j.conf.ConfigurationBuilder;
  * @author mikesir87
  */
 public class TwitterPublisher extends Notifier {
-	private static final List<String> VALUES_REPLACED_WITH_NULL = Arrays.asList("", "(Default)", "(System Default)");
 
-	private static final Logger LOGGER = Logger.getLogger(TwitterPublisher.class.getName());
+	private static final Logger LOGGER = Logger
+			.getLogger(TwitterPublisher.class.getName());
 
 	private Boolean onlyOnFailureOrRecovery;
 	private Boolean includeUrl;
@@ -60,12 +57,9 @@ public class TwitterPublisher extends Notifier {
 	}
 
 	@DataBoundConstructor
-	public TwitterPublisher(String onlyOnFailureOrRecovery,	String includeUrl) {
-		this(cleanToBoolean(onlyOnFailureOrRecovery), cleanToBoolean(includeUrl));
-	}
-
-	private static String cleanToString(String string) {
-		return VALUES_REPLACED_WITH_NULL.contains(string) ? null : string;
+	public TwitterPublisher(String onlyOnFailureOrRecovery, String includeUrl) {
+		this(cleanToBoolean(onlyOnFailureOrRecovery),
+				cleanToBoolean(includeUrl));
 	}
 
 	private static Boolean cleanToBoolean(String string) {
@@ -87,7 +81,8 @@ public class TwitterPublisher extends Notifier {
 		if (status == HttpStatus.SC_OK) {
 			return gm.getResponseBodyAsString();
 		} else {
-			throw new IOException("Non-OK response code back from tinyurl: " + status);
+			throw new IOException("Non-OK response code back from tinyurl: "
+					+ status);
 		}
 
 	}
@@ -105,7 +100,8 @@ public class TwitterPublisher extends Notifier {
 	}
 
 	@Override
-	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+	public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
+			BuildListener listener) {
 		if (shouldTweet(build)) {
 			try {
 				String newStatus = createTwitterStatusMessage(build);
@@ -129,14 +125,16 @@ public class TwitterPublisher extends Notifier {
 		}
 		String tinyUrl = "";
 		if (shouldIncludeUrl()) {
-			String absoluteBuildURL = ((DescriptorImpl) getDescriptor()).getUrl() + build.getUrl();
+			String absoluteBuildURL = ((DescriptorImpl) getDescriptor())
+					.getUrl() + build.getUrl();
 			try {
 				tinyUrl = createTinyUrl(absoluteBuildURL);
 			} catch (Exception e) {
 				tinyUrl = "?";
 			}
 		}
-		return String.format("%s%s:%s $%d - %s", toblame, result, projectName, build.number, tinyUrl);
+		return String.format("%s%s:%s $%d - %s", toblame, result, projectName,
+				build.number, tinyUrl);
 	}
 
 	private String getUserString(AbstractBuild<?, ?> build) throws IOException {
@@ -145,17 +143,21 @@ public class TwitterPublisher extends Notifier {
 		ChangeLogSet<? extends Entry> changeSet = build.getChangeSet();
 		if (culprits.size() > 0) {
 			for (User user : culprits) {
-				UserTwitterProperty tid = user.getProperty(UserTwitterProperty.class);
+				UserTwitterProperty tid = user
+						.getProperty(UserTwitterProperty.class);
 				if (tid.getTwitterid() != null) {
-					userString.append("@").append(tid.getTwitterid()).append(" ");
+					userString.append("@").append(tid.getTwitterid())
+							.append(" ");
 				}
 			}
 		} else if (changeSet != null) {
 			for (Entry entry : changeSet) {
 				User user = entry.getAuthor();
-				UserTwitterProperty tid = user.getProperty(UserTwitterProperty.class);
+				UserTwitterProperty tid = user
+						.getProperty(UserTwitterProperty.class);
 				if (tid.getTwitterid() != null) {
-					userString.append("@").append(tid.getTwitterid()).append(" ");
+					userString.append("@").append(tid.getTwitterid())
+							.append(" ");
 				}
 			}
 		}
@@ -167,16 +169,19 @@ public class TwitterPublisher extends Notifier {
 	 * includes both failed and unstable builds. A recovery is defined as a
 	 * successful build that follows a build that was not successful. Always
 	 * returns false for aborted builds.
-	 *
-	 * @param build the Build object
+	 * 
+	 * @param build
+	 *            the Build object
 	 * @return true if this build represents a recovery or failure
 	 */
 	protected boolean isFailureOrRecovery(AbstractBuild<?, ?> build) {
-		if (build.getResult() == Result.FAILURE || build.getResult() == Result.UNSTABLE) {
+		if (build.getResult() == Result.FAILURE
+				|| build.getResult() == Result.UNSTABLE) {
 			return true;
 		} else if (build.getResult() == Result.SUCCESS) {
 			AbstractBuild<?, ?> previousBuild = build.getPreviousBuild();
-			if (previousBuild != null && previousBuild.getResult() != Result.SUCCESS) {
+			if (previousBuild != null
+					&& previousBuild.getResult() != Result.SUCCESS) {
 				return true;
 			} else {
 				return false;
@@ -197,8 +202,9 @@ public class TwitterPublisher extends Notifier {
 	/**
 	 * Determine if this build results should be tweeted. Uses the local
 	 * settings if they are provided, otherwise the global settings.
-	 *
-	 * @param build the Build object
+	 * 
+	 * @param build
+	 *            the Build object
 	 * @return true if we should tweet this build result
 	 */
 	protected boolean shouldTweet(AbstractBuild<?, ?> build) {
@@ -216,15 +222,18 @@ public class TwitterPublisher extends Notifier {
 	}
 
 	@Extension
-	public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
-		private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class.getName());
+	public static final class DescriptorImpl extends
+			BuildStepDescriptor<Publisher> {
+		private static final Logger LOGGER = Logger
+				.getLogger(DescriptorImpl.class.getName());
 
 		private static final String CONSUMER_KEY = "8B6nAb0a5QScWxROd5oWA";;
-		private static final String CONSUMER_SECRET = "pXO0lgCZYUvix7Ay7YLdsIep38VBiH2cTldOeMj1J5s";
-		
+		private static final String CONSUMER_SECRET = 
+				"pXO0lgCZYUvix7Ay7YLdsIep38VBiH2cTldOeMj1J5s";
+
 		public String token;
 		public String tokenSecret;
-		
+
 		public String hudsonUrl;
 		public boolean onlyOnFailureOrRecovery;
 		public boolean includeUrl;
@@ -235,14 +244,14 @@ public class TwitterPublisher extends Notifier {
 		}
 
 		@Override
-		public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+		public boolean configure(StaplerRequest req, JSONObject formData)
+				throws FormException {
 			// set the booleans to false as defaults
 			includeUrl = false;
 			onlyOnFailureOrRecovery = false;
 
 			req.bindParameters(this, "twitter.");
 			hudsonUrl = Mailer.descriptor().getUrl();
-
 
 			save();
 			return super.configure(req, formData);
@@ -256,7 +265,7 @@ public class TwitterPublisher extends Notifier {
 		public String getToken() {
 			return token;
 		}
-		
+
 		public String getTokenSecret() {
 			return tokenSecret;
 		}
@@ -279,7 +288,8 @@ public class TwitterPublisher extends Notifier {
 		}
 
 		@Override
-		public Publisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+		public Publisher newInstance(StaplerRequest req, JSONObject formData)
+				throws FormException {
 			if (hudsonUrl == null) {
 				// if Hudson URL is not configured yet, infer some default
 				hudsonUrl = Functions.inferHudsonURL(req);
@@ -292,20 +302,17 @@ public class TwitterPublisher extends Notifier {
 			LOGGER.info("Attempting to update Twitter status to: " + message);
 
 			AsyncTwitterFactory factory = new AsyncTwitterFactory();
-			AsyncTwitter twitter =  factory.getInstance(
-					new OAuthAuthorization(
-							new ConfigurationBuilder()
+			AsyncTwitter twitter = factory.getInstance(new OAuthAuthorization(
+					new ConfigurationBuilder()
 							.setOAuthConsumerKey(CONSUMER_KEY)
 							.setOAuthConsumerSecret(CONSUMER_SECRET)
 							.setOAuthAccessToken(token)
-							.setOAuthAccessTokenSecret(tokenSecret)
-							.build()
-					)
-			);			
+							.setOAuthAccessTokenSecret(tokenSecret).build()));
 			twitter.addListener(new TwitterAdapter() {
 				@Override
 				public void onException(TwitterException e, TwitterMethod method) {
-					LOGGER.warning("Exception updating Twitter status: " + e.toString());
+					LOGGER.warning("Exception updating Twitter status: "
+							+ e.toString());
 				}
 
 				@Override
@@ -315,10 +322,10 @@ public class TwitterPublisher extends Notifier {
 			});
 			twitter.updateStatus(message);
 		}
-		
-		@Deprecated 
-        public transient String id;
+
 		@Deprecated
-        public transient String password;
+		public transient String id;
+		@Deprecated
+		public transient String password;
 	}
 }
