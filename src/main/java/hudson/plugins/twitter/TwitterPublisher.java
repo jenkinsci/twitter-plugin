@@ -51,15 +51,10 @@ public class TwitterPublisher extends Notifier {
   private Boolean onlyOnFailureOrRecovery;
   private Boolean includeUrl;
 
-  private TwitterPublisher(Boolean onlyOnFailureOrRecovery, 
-      Boolean includeUrl) {
-    this.onlyOnFailureOrRecovery = onlyOnFailureOrRecovery;
-    this.includeUrl = includeUrl;
-  }
-
   @DataBoundConstructor
   public TwitterPublisher(String onlyOnFailureOrRecovery, String includeUrl) {
-    this(cleanToBoolean(onlyOnFailureOrRecovery), cleanToBoolean(includeUrl));
+    this.onlyOnFailureOrRecovery = cleanToBoolean(onlyOnFailureOrRecovery);
+    this.includeUrl = cleanToBoolean(includeUrl);
   }
 
   @Override
