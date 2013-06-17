@@ -18,59 +18,59 @@ import org.kohsuke.stapler.export.ExportedBean;
 @ExportedBean(defaultVisibility = 999)
 public class UserTwitterProperty extends UserProperty {
 
-    public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
+  public static final DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
-    private String twitterid;
+  private String twitterid;
 
-    public UserTwitterProperty() {
+  public UserTwitterProperty() {
+  }
+
+  @DataBoundConstructor
+  public UserTwitterProperty(String twitterid) {
+    this.twitterid = twitterid;
+  }
+
+  public UserPropertyDescriptor getDescriptor() {
+    return DESCRIPTOR;
+  }
+
+  @Exported
+  public User getUser() {
+    return user;
+  }
+
+  @Exported
+  public String getTwitterid() {
+    return twitterid;
+  }
+
+  public void setTwitterid(String twitterid) {
+    this.twitterid = twitterid;
+  }
+
+  public static final class DescriptorImpl extends UserPropertyDescriptor {
+    public DescriptorImpl() {
+      super(UserTwitterProperty.class);
     }
 
-    @DataBoundConstructor
-    public UserTwitterProperty(String twitterid) {
-        this.twitterid = twitterid;
+    @Override
+    public String getDisplayName() {
+      return "Twitter User Name";
     }
 
-    public UserPropertyDescriptor getDescriptor() {
-        return DESCRIPTOR;
+    @Override
+    public UserTwitterProperty newInstance(StaplerRequest req,
+        JSONObject formData) throws hudson.model.Descriptor.FormException {
+      if (formData.has("twitterid")) {
+        return req.bindJSON(UserTwitterProperty.class, formData);
+      } else {
+        return new UserTwitterProperty();
+      }
     }
 
-    @Exported
-    public User getUser() {
-        return user;
+    @Override
+    public UserProperty newInstance(User user) {
+      return null;
     }
-
-    @Exported
-    public String getTwitterid() {
-        return twitterid;
-    }
-
-    public void setTwitterid(String twitterid) {
-        this.twitterid = twitterid;
-    }
-
-    public static final class DescriptorImpl extends UserPropertyDescriptor {
-        public DescriptorImpl() {
-            super(UserTwitterProperty.class);
-        }
-
-        @Override
-        public String getDisplayName() {
-            return "Twitter User Name";
-        }
-
-        @Override
-        public UserTwitterProperty newInstance(StaplerRequest req, JSONObject formData)
-                throws hudson.model.Descriptor.FormException {
-            if (formData.has("twitterid")) {
-                return req.bindJSON(UserTwitterProperty.class, formData);
-            } else {
-                return new UserTwitterProperty();
-            }
-        }
-
-        @Override
-        public UserProperty newInstance(User user) {
-            return null;
-        }
-    }
+  }
 }
