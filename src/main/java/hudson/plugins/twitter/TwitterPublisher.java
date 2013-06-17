@@ -7,25 +7,19 @@ import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.User;
-import hudson.scm.ChangeLogSet;
-import hudson.scm.ChangeLogSet.Entry;
+import hudson.plugins.twitter.messages.DefaultTweetBuilder;
+import hudson.plugins.twitter.messages.TweetBuilder;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import hudson.tasks.Publisher;
 import hudson.tasks.Mailer;
 
-import java.io.IOException;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.sf.json.JSONObject;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -62,13 +56,41 @@ public class TwitterPublisher extends Notifier {
       BuildListener listener) {
     if (shouldTweet(build)) {
       try {
-        String newStatus = createTwitterStatusMessage(build);
-        ((DescriptorImpl) getDescriptor()).updateTwit(newStatus);
+        DescriptorImpl descriptor = (DescriptorImpl) getDescriptor();
+        TweetBuilder builder = getTweetBuilder();
+        String newStatus = builder.generateTweet(build, shouldIncludeUrl());
+        descriptor.updateTwit(newStatus);
       } catch (Exception e) {
         LOGGER.log(Level.SEVERE, "Unable to send tweet.", e);
       }
     }
     return true;
+  }
+  
+  protected TweetBuilder getTweetBuilder() {
+    return new DefaultTweetBuilder();
+  }
+
+  /**
+   * Determine if this build results should be tweeted. Uses the local settings
+   * if they are provided, otherwise the global settings.
+   * 
+   * @param build
+   *          the Build object
+   * @return true if we should tweet this build result
+   */
+  protected boolean shouldTweet(AbstractBuild<?, ?> build) {
+    if (onlyOnFailureOrRecovery == null) {
+      if (((DescriptorImpl) getDescriptor()).onlyOnFailureOrRecovery) {
+        return isFailureOrRecovery(build);
+      } else {
+        return true;
+      }
+    } else if (onlyOnFailureOrRecovery.booleanValue()) {
+      return isFailureOrRecovery(build);
+    } else {
+      return true;
+    }
   }
 
   private static Boolean cleanToBoolean(String string) {
@@ -81,21 +103,6 @@ public class TwitterPublisher extends Notifier {
     return result;
   }
 
-  private static String createTinyUrl(String url) throws IOException {
-    HttpClient client = new HttpClient();
-    GetMethod gm = new GetMethod("http://tinyurl.com/api-create.php?url="
-        + url.replace(" ", "%20"));
-
-    int status = client.executeMethod(gm);
-    if (status == HttpStatus.SC_OK) {
-      return gm.getResponseBodyAsString();
-    } else {
-      throw new IOException("Non-OK response code back from tinyurl: " 
-          + status);
-    }
-
-  }
-
   public Boolean getIncludeUrl() {
     return includeUrl;
   }
@@ -106,53 +113,6 @@ public class TwitterPublisher extends Notifier {
 
   public BuildStepMonitor getRequiredMonitorService() {
     return BuildStepMonitor.BUILD;
-  }
-
-  private String createTwitterStatusMessage(AbstractBuild<?, ?> build) {
-    String projectName = build.getProject().getName();
-    String result = build.getResult().toString();
-    String toblame = "";
-    try {
-      if (!build.getResult().equals(Result.SUCCESS)) {
-        toblame = getUserString(build);
-      }
-    } catch (Exception ignore) {
-    }
-    String tinyUrl = "";
-    if (shouldIncludeUrl()) {
-      String absoluteBuildURL = ((DescriptorImpl) getDescriptor()).getUrl()
-          + build.getUrl();
-      try {
-        tinyUrl = createTinyUrl(absoluteBuildURL);
-      } catch (Exception e) {
-        tinyUrl = "?";
-      }
-    }
-    return String.format("%s%s:%s $%d - %s", toblame, result, projectName,
-        build.number, tinyUrl);
-  }
-
-  private String getUserString(AbstractBuild<?, ?> build) throws IOException {
-    StringBuilder userString = new StringBuilder("");
-    Set<User> culprits = build.getCulprits();
-    ChangeLogSet<? extends Entry> changeSet = build.getChangeSet();
-    if (culprits.size() > 0) {
-      for (User user : culprits) {
-        UserTwitterProperty tid = user.getProperty(UserTwitterProperty.class);
-        if (tid.getTwitterid() != null) {
-          userString.append("@").append(tid.getTwitterid()).append(" ");
-        }
-      }
-    } else if (changeSet != null) {
-      for (Entry entry : changeSet) {
-        User user = entry.getAuthor();
-        UserTwitterProperty tid = user.getProperty(UserTwitterProperty.class);
-        if (tid.getTwitterid() != null) {
-          userString.append("@").append(tid.getTwitterid()).append(" ");
-        }
-      }
-    }
-    return userString.toString();
   }
 
   /**
@@ -189,31 +149,10 @@ public class TwitterPublisher extends Notifier {
     }
   }
 
-  /**
-   * Determine if this build results should be tweeted. Uses the local settings
-   * if they are provided, otherwise the global settings.
-   * 
-   * @param build
-   *          the Build object
-   * @return true if we should tweet this build result
-   */
-  protected boolean shouldTweet(AbstractBuild<?, ?> build) {
-    if (onlyOnFailureOrRecovery == null) {
-      if (((DescriptorImpl) getDescriptor()).onlyOnFailureOrRecovery) {
-        return isFailureOrRecovery(build);
-      } else {
-        return true;
-      }
-    } else if (onlyOnFailureOrRecovery.booleanValue()) {
-      return isFailureOrRecovery(build);
-    } else {
-      return true;
-    }
-  }
-
   @Extension
   public static final class DescriptorImpl extends
       BuildStepDescriptor<Publisher> {
+    
     private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class
         .getName());
 
