@@ -7,8 +7,10 @@ import hudson.model.BuildListener;
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.plugins.twitter.messages.AsyncTweetDeliverer;
 import hudson.plugins.twitter.messages.DefaultTweetBuilder;
 import hudson.plugins.twitter.messages.TweetBuilder;
+import hudson.plugins.twitter.messages.TweetDeliverer;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
@@ -22,15 +24,6 @@ import net.sf.json.JSONObject;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
-
-import twitter4j.AsyncTwitter;
-import twitter4j.AsyncTwitterFactory;
-import twitter4j.Status;
-import twitter4j.TwitterAdapter;
-import twitter4j.TwitterException;
-import twitter4j.TwitterMethod;
-import twitter4j.auth.OAuthAuthorization;
-import twitter4j.conf.ConfigurationBuilder;
 
 /**
  * @author cactusman
@@ -156,10 +149,6 @@ public class TwitterPublisher extends Notifier {
     private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class
         .getName());
 
-    private static final String CONSUMER_KEY = "8B6nAb0a5QScWxROd5oWA";
-    private static final String CONSUMER_SECRET = 
-        "pXO0lgCZYUvix7Ay7YLdsIep38VBiH2cTldOeMj1J5s";
-
     public String token;
     public String tokenSecret;
 
@@ -184,6 +173,11 @@ public class TwitterPublisher extends Notifier {
 
       save();
       return super.configure(req, formData);
+    }
+
+    public void updateTwit(String message) throws Exception {
+      TweetDeliverer deliverer = new AsyncTweetDeliverer(token, tokenSecret);
+      deliverer.deliverTweet(message);
     }
 
     @Override
@@ -225,29 +219,6 @@ public class TwitterPublisher extends Notifier {
         save();
       }
       return super.newInstance(req, formData);
-    }
-
-    public void updateTwit(String message) throws Exception {
-      LOGGER.info("Attempting to update Twitter status to: " + message);
-
-      AsyncTwitterFactory factory = new AsyncTwitterFactory();
-      AsyncTwitter twitter = factory.getInstance(new OAuthAuthorization(
-          new ConfigurationBuilder().setOAuthConsumerKey(CONSUMER_KEY)
-              .setOAuthConsumerSecret(CONSUMER_SECRET)
-              .setOAuthAccessToken(token)
-              .setOAuthAccessTokenSecret(tokenSecret).build()));
-      twitter.addListener(new TwitterAdapter() {
-        @Override
-        public void onException(TwitterException e, TwitterMethod method) {
-          LOGGER.warning("Exception updating Twitter status: " + e.toString());
-        }
-
-        @Override
-        public void updatedStatus(Status statuses) {
-          LOGGER.info("Updated Twitter status: " + statuses.getText());
-        }
-      });
-      twitter.updateStatus(message);
     }
 
     @Deprecated
