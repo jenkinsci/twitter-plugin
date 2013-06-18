@@ -1,18 +1,15 @@
 package hudson.plugins.twitter.messages;
 
-import java.io.IOException;
-import java.util.Set;
-
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.GetMethod;
-
 import hudson.model.Result;
 import hudson.model.AbstractBuild;
 import hudson.model.User;
 import hudson.plugins.twitter.UserTwitterProperty;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.Entry;
+
+import java.io.IOException;
+import java.util.Set;
+
 import jenkins.model.Jenkins;
 
 /**
@@ -25,6 +22,11 @@ import jenkins.model.Jenkins;
 public class DefaultTweetBuilder implements TweetBuilder {
 
   private static final String TWEET_FORMAT = "%s%s:%s $%d - %s";
+  private LinkGenerator linkGenerator;
+  
+  public DefaultTweetBuilder(LinkGenerator linkGenerator) {
+    this.linkGenerator = linkGenerator;
+  }
   
   public String generateTweet(AbstractBuild<?, ?> build, boolean includeBuildUrl) {
     String projectName = build.getProject().getName();
@@ -36,18 +38,18 @@ public class DefaultTweetBuilder implements TweetBuilder {
       }
     } catch (Exception ignore) {
     }
-    String tinyUrl = "";
+    String shortenedUrl = "";
     if (includeBuildUrl) {
       String absoluteBuildURL = Jenkins.getInstance().getRootUrl() + 
           build.getUrl();
       try {
-        tinyUrl = createTinyUrl(absoluteBuildURL);
+        shortenedUrl = linkGenerator.getShortenedLink(absoluteBuildURL);
       } catch (Exception e) {
-        tinyUrl = "?";
+        shortenedUrl = "?";
       }
     }
-    return String.format("%s%s:%s $%d - %s", toblame, result, projectName,
-        build.number, tinyUrl);
+    return String.format(TWEET_FORMAT, toblame, result, projectName,
+        build.number, shortenedUrl);
   }
   
   private String getUserString(AbstractBuild<?, ?> build) throws IOException {
@@ -72,19 +74,5 @@ public class DefaultTweetBuilder implements TweetBuilder {
     }
     return userString.toString();
   }
-
-  private static String createTinyUrl(String url) throws IOException {
-    HttpClient client = new HttpClient();
-    GetMethod gm = new GetMethod("http://tinyurl.com/api-create.php?url="
-        + url.replace(" ", "%20"));
-
-    int status = client.executeMethod(gm);
-    if (status == HttpStatus.SC_OK) {
-      return gm.getResponseBodyAsString();
-    } else {
-      throw new IOException("Non-OK response code back from tinyurl: " 
-          + status);
-    }
-  }
-
+  
 }

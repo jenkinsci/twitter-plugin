@@ -9,6 +9,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.plugins.twitter.messages.AsyncTweetDeliverer;
 import hudson.plugins.twitter.messages.DefaultTweetBuilder;
+import hudson.plugins.twitter.messages.TinyUrlLinkGenerator;
 import hudson.plugins.twitter.messages.TweetBuilder;
 import hudson.plugins.twitter.messages.TweetDeliverer;
 import hudson.tasks.BuildStepDescriptor;
@@ -61,7 +62,7 @@ public class TwitterPublisher extends Notifier {
   }
   
   protected TweetBuilder getTweetBuilder() {
-    return new DefaultTweetBuilder();
+    return new DefaultTweetBuilder(new TinyUrlLinkGenerator());
   }
 
   /**
