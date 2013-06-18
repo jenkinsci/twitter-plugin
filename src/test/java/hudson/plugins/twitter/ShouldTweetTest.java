@@ -1,18 +1,23 @@
 package hudson.plugins.twitter;
 
+import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.FreeStyleBuild;
-import hudson.model.FreeStyleProject;
 import hudson.model.Result;
+import hudson.model.AbstractBuild;
+import hudson.model.Descriptor;
+import hudson.model.FreeStyleProject;
 import hudson.plugins.twitter.TwitterPublisher.DescriptorImpl;
 import hudson.tasks.Builder;
 
 import java.io.IOException;
 
-import org.jvnet.hudson.test.FailureBuilder;
+import net.sf.json.JSONObject;
+
 import org.jvnet.hudson.test.HudsonTestCase;
+import org.jvnet.hudson.test.FailureBuilder;
+import org.kohsuke.stapler.StaplerRequest;
 
 public class ShouldTweetTest extends HudsonTestCase {
 
@@ -153,6 +158,15 @@ public class ShouldTweetTest extends HudsonTestCase {
             build.setResult(Result.UNSTABLE);
             return false;
         }
+        @Extension
+        public static final class DescriptorImpl extends Descriptor<Builder> {
+            public String getDisplayName() {
+                return "Always unstable";
+            }
+            public UnstableBuilder newInstance(StaplerRequest req, JSONObject data) {
+                return new UnstableBuilder();
+            }
+        }
     }
 
     public static class AbortedBuilder extends Builder {
@@ -160,6 +174,15 @@ public class ShouldTweetTest extends HudsonTestCase {
                 throws InterruptedException, IOException {
             build.setResult(Result.ABORTED);
             return false;
+        }
+        @Extension
+        public static final class DescriptorImpl extends Descriptor<Builder> {
+            public String getDisplayName() {
+                return "Always aborted";
+            }
+            public AbortedBuilder newInstance(StaplerRequest req, JSONObject data) {
+                return new AbortedBuilder();
+            }
         }
     }
 
