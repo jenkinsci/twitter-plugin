@@ -8,7 +8,9 @@ Full documentation can be seen on the wiki page on the [Jenkins Plugin Wiki Page
 
 Although it's on the wiki too, having it here allows us to update it as development is being done.  Once the release is made, the wiki can then be updated.
 
-### Version 0.7 (Upcoming)
+### Version 0.8 (In Development)
+
+### Version 0.7 (June 18, 2013)
 - Updated to Twitter4J 3.0.3
 - Upgraded Jenkins dependency to 1.445
 
