@@ -31,13 +31,7 @@ public class DefaultTweetBuilder implements TweetBuilder {
   public String generateTweet(AbstractBuild<?, ?> build, boolean includeBuildUrl) {
     String projectName = build.getProject().getName();
     String result = build.getResult().toString();
-    String toblame = "";
-    try {
-      if (!build.getResult().equals(Result.SUCCESS)) {
-        toblame = getUserString(build);
-      }
-    } catch (Exception ignore) {
-    }
+    String toBlame = getUserString(build);
     String shortenedUrl = "";
     if (includeBuildUrl) {
       String absoluteBuildURL = Jenkins.getInstance().getRootUrl() + 
@@ -48,31 +42,35 @@ public class DefaultTweetBuilder implements TweetBuilder {
         shortenedUrl = "?";
       }
     }
-    return String.format(TWEET_FORMAT, toblame, result, projectName,
+    return String.format(TWEET_FORMAT, toBlame, result, projectName,
         build.number, shortenedUrl);
   }
   
-  private String getUserString(AbstractBuild<?, ?> build) throws IOException {
-    StringBuilder userString = new StringBuilder("");
+  private String getUserString(AbstractBuild<?, ?> build) {
+    if (build.getResult().equals(Result.SUCCESS))
+      return "";
+    
+    StringBuilder userString = new StringBuilder();
     Set<User> culprits = build.getCulprits();
     ChangeLogSet<? extends Entry> changeSet = build.getChangeSet();
+    
     if (culprits.size() > 0) {
       for (User user : culprits) {
-        UserTwitterProperty tid = user.getProperty(UserTwitterProperty.class);
-        if (tid.getTwitterid() != null) {
-          userString.append("@").append(tid.getTwitterid()).append(" ");
-        }
+        addUserToBuilder(user, userString);
       }
     } else if (changeSet != null) {
       for (Entry entry : changeSet) {
-        User user = entry.getAuthor();
-        UserTwitterProperty tid = user.getProperty(UserTwitterProperty.class);
-        if (tid.getTwitterid() != null) {
-          userString.append("@").append(tid.getTwitterid()).append(" ");
-        }
+        addUserToBuilder(entry.getAuthor(), userString);
       }
     }
     return userString.toString();
+  }
+  
+  private void addUserToBuilder(User user, StringBuilder userString) {
+    UserTwitterProperty tid = user.getProperty(UserTwitterProperty.class);
+    if (tid.getTwitterid() != null) {
+      userString.append("@").append(tid.getTwitterid()).append(" ");
+    }    
   }
   
 }
