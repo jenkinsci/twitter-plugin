@@ -44,7 +44,7 @@ public class TwitterPublisher extends Notifier {
     this.onlyOnFailureOrRecovery = cleanToBoolean(onlyOnFailureOrRecovery);
     this.includeUrl = cleanToBoolean(includeUrl);
   }
-
+  
   @Override
   public boolean perform(AbstractBuild<?, ?> build, Launcher launcher,
       BuildListener listener) {
@@ -53,12 +53,19 @@ public class TwitterPublisher extends Notifier {
         DescriptorImpl descriptor = (DescriptorImpl) getDescriptor();
         TweetBuilder builder = getTweetBuilder();
         String newStatus = builder.generateTweet(build, shouldIncludeUrl());
-        descriptor.updateTwit(newStatus);
-      } catch (Exception e) {
+        updateTwit(newStatus, descriptor.token, descriptor.tokenSecret);
+      } 
+      catch (Exception e) {
         LOGGER.log(Level.SEVERE, "Unable to send tweet.", e);
       }
     }
     return true;
+  }
+
+  private void updateTwit(String message, String token, String tokenSecret) 
+      throws Exception {
+    TweetDeliverer deliverer = new AsyncTweetDeliverer(token, tokenSecret);
+    deliverer.deliverTweet(message);
   }
   
   protected TweetBuilder getTweetBuilder() {
@@ -174,11 +181,6 @@ public class TwitterPublisher extends Notifier {
 
       save();
       return super.configure(req, formData);
-    }
-
-    public void updateTwit(String message) throws Exception {
-      TweetDeliverer deliverer = new AsyncTweetDeliverer(token, tokenSecret);
-      deliverer.deliverTweet(message);
     }
 
     @Override
