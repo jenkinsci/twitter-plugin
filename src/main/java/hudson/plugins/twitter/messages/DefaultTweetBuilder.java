@@ -68,7 +68,7 @@ public class DefaultTweetBuilder implements TweetBuilder {
   
   private void addUserToBuilder(User user, StringBuilder userString) {
     UserTwitterProperty tid = user.getProperty(UserTwitterProperty.class);
-    if (tid.getTwitterid() != null) {
+    if (tid != null && tid.getTwitterid() != null) {
       userString.append("@").append(tid.getTwitterid()).append(" ");
     }    
   }
