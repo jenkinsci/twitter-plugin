@@ -25,7 +25,7 @@
 		<dependency>
 			<groupId>org.twitter4j</groupId>
 			<artifactId>twitter4j-async</artifactId>
-			<version>3.0.3</version>
+			<version>4.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>mockobjects</groupId>
