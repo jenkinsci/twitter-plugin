@@ -76,7 +76,7 @@
     <repository>
       <id>repo.jenkins-ci.org</id>
       <name>Jenkins Repository</name>
-      <url>http://repo.jenkins-ci.org/public/</url>
+      <url>https://repo.jenkins-ci.org/public/</url>
     </repository>
     <repository>
       <id>twitter4j.org</id>
@@ -94,7 +94,7 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<id>repo.jenkins-ci.org</id>
-			<url>http://repo.jenkins-ci.org/public/</url>
+			<url>https://repo.jenkins-ci.org/public/</url>
 		</pluginRepository>
 	</pluginRepositories>
 </project>  
